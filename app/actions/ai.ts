@@ -29,34 +29,38 @@ const questionSchema = z.object({
 
 // Helper for prompt construction
 const getBasePrompt = (electionName: string, userProfile: any) => `
-あなたは極めて高度で公平な政治・選挙アドバイザーです。
-ユーザーが「${electionName}」において、自分の価値観に合った投票先を選ぶための、政治的スタンスを判定する質問を作成してください。
+    現在の日時は ${new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })} です。
+    あなたは極めて高度で公平な政治・選挙アドバイザーです。
+    ユーザーが「${electionName}」において、自分の価値観に合った投票先を選ぶための、政治的スタンスを判定する質問を作成してください。
 
-ユーザーのプロフィール:
-${JSON.stringify(userProfile)}
+    ユーザーのプロフィール:
+    ${JSON.stringify(userProfile)}
 
-【重要】質問の作成方針:
-1. **政策の是非**: 具体的な政策の賛否（消費税、改憲、エネルギーなど）。
-2. **根本的な政治姿勢**: 「大きな政府か小さな政府か」「自己責任か公助か」「伝統か革新か」といった根本的な価値観。
-3. **国家・社会観**: 愛国心の度合い、国際協調と国益のバランス、社会への関わり方に対する個人の考え方。
-4. **人生観**: 個人の自由と社会秩序のどちらを重視するかなど。
+    【重要】質問の作成方針:
+    1. **政策の是非**: 具体的な政策の賛否（消費税、改憲、エネルギーなど）。
+    2. **根本的な政治姿勢**: 「大きな政府か小さな政府か」「自己責任か公助か」「伝統か革新か」といった根本的な価値観。
+    3. **国家・社会観**: 愛国心の度合い、国際協調と国益のバランス、社会への関わり方に対する個人の考え方。
+    4. **人生観**: 個人の自由と社会秩序のどちらを重視するかなど。
 
-これらをバランスよく組み合わせ、ユーザーの深層心理や政治的DNAを浮き彫りにする質問にしてください。
-`;
+    これらをバランスよく組み合わせ、ユーザーの深層心理や政治的DNAを浮き彫りにする質問にしてください。
+    `;
 
 export async function generateElectionQuestions(electionName: string, userProfile: any) {
     try {
         // Step 1: Research the election context
+        // Enable search grounding to get the latest implementation details
         const researchPrompt = `
+        現在の日時は ${new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })} です。
         あなたは${electionName}のエキスパートです。
-        以下の情報を知識ベースから検索し、具体的にリストアップしてください。
-        
-        1. **主要な争点**: 今この選挙で問われている具体的な政策課題（例: 消費税増税、原発再稼働、子育て支援の財源など）。
+        以下の情報を、Google検索等の信頼できるソースから検索し、具体的にリストアップしてください。
+
+        1. **主要な争点**: 今この選挙で問われている具体的な政策課題（例: 物価高対策、社会保険料、外交安保など）。
         2. **候補者・政党の対立軸**: どの候補/政党が何と言って対立しているか。
         `;
 
         const { text: electionContext } = await generateText({
-            model: google("gemini-2.0-flash"),
+            // @ts-expect-error - The installed version's types might not support the settings object yet, but runtime should.
+            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
@@ -70,7 +74,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     タスク:
     上記の方針と**実際の争点**に基づき、**20問**の質問を作成してください。
     一般的な政治観だけでなく、**「${electionName}」で実際に議論されている具体的な政策（例えば${electionContext.slice(0, 20)}...など）**についての賛否を問う質問を必ず含めてください。
-    
+
     各質問には、ユーザーが判断するための材料として、以下の詳細な分析（analysis）を必ず付与してください。
     - メリット・デメリットの公平な分析
     - 政治課題となっている背景
@@ -78,7 +82,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.0-flash"),
+            model: google("gemini-2.0-flash"), // Schema generation works better without grounding sometimes, context is already grounded
             schema: questionSchema,
             prompt: prompt,
         });
@@ -137,19 +141,25 @@ const electionSchema = z.object({
 
 export async function findElections(residence: string) {
     try {
+        const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
         const prompt = `
+    現在の日時は ${today} です。
     あなたは日本の選挙制度に詳しいアシスタントです。
     ユーザーの居住地「${residence}」に関連する、現在行われている、あるいは近い将来（1年以内）予定されている主要な選挙を3〜5件リストアップしてください。
-    
+
+    特に、**既に日程が決まっているもの（公示日・投票日）については、正確な日付**を検索して回答してください。
+    「未定」とする前に、必ず総務省や自治体の選挙管理委員会の最新発表を確認するつもりで回答してください。
+
     条件:
-    1. **日付の正確性**: 公示日（告示日）と投票日を可能な限り正確に特定してください。既に決まっている場合は必ず日付を入れてください（「未定」と安易に書かないこと）。
+    1. **日付の正確性**: 公示日（告示日）と投票日を可能な限り正確に特定してください。
     2. その地域で投票権がある可能性が高いもの（都道府県知事選、市区町村長選、議会選、または衆参の国政選挙）。
     3. もし直近で具体的な選挙がない場合は、「次期衆議院議員総選挙」や、その自治体の「次期首長選挙（任期満了に伴う）」などを挙げてください。
     4. 過去の選挙は含めないでください。
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.0-flash"),
+            // @ts-expect-error - search grounding
+            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
             schema: electionSchema,
             prompt: prompt,
         });

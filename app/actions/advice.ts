@@ -7,9 +7,11 @@ import { google } from "@ai-sdk/google";
 export async function generateVoteAdvice(electionName: string, userProfile: any, questions: any[], answers: any, comments: any) {
     try {
         // Step 1: Gather knowledge about the election (Simulating "Search" using Gemini's knowledge)
+        const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
         const researchPrompt = `
+        現在の日時は ${today} です。
         あなたは${electionName}に関するエキスパートです。
-        以下の情報を、あなたの知識ベースから検索して、正確かつ具体的にリストアップしてください。
+        以下の情報を、Google検索等の信頼できるソースから検索し、正確かつ具体的にリストアップしてください。
         
         1. **選挙区の候補者情報**:
            - 候補者名、年齢、所属政党
@@ -27,7 +29,8 @@ export async function generateVoteAdvice(electionName: string, userProfile: any,
         `;
 
         const { text: electionContext } = await generateText({
-            model: google("gemini-2.0-flash"),
+            // @ts-expect-error - search grounding
+            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
