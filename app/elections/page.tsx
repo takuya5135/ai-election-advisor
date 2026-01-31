@@ -19,6 +19,8 @@ export default function ElectionSearchPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [residence, setResidence] = useState("");
+    const [isManualMode, setIsManualMode] = useState(false);
+    const [manualName, setManualName] = useState("");
 
     useEffect(() => {
         const fetchElections = async () => {
@@ -84,8 +86,6 @@ export default function ElectionSearchPage() {
         );
     }
 
-    const [isManualMode, setIsManualMode] = useState(false);
-    const [manualName, setManualName] = useState("");
 
     const handleManualSubmit = (e: React.FormEvent) => {
         e.preventDefault();
