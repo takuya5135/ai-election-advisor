@@ -57,6 +57,9 @@ export default function ElectionSearchPage() {
     }, [router]);
 
     const handleSelectElection = (election: Election) => {
+        localStorage.removeItem("user_answers");
+        localStorage.removeItem("user_comments");
+        localStorage.removeItem("generated_questions");
         localStorage.setItem("target_election", election.name);
         localStorage.setItem("target_election_level", election.level);
         router.push("/questions/generate");
@@ -91,6 +94,9 @@ export default function ElectionSearchPage() {
     const handleManualSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (manualName.trim()) {
+            localStorage.removeItem("user_answers");
+            localStorage.removeItem("user_comments");
+            localStorage.removeItem("generated_questions");
             localStorage.setItem("target_election", manualName.trim());
             // Default to national for manual entries as they are usually major national ones, 
             // or we could add a toggle. For now, let's assume if it contains "衆" "参" it's national.
