@@ -220,7 +220,8 @@ export default function QuestionsPage() {
                     コメント・メモ（任意）
                 </label>
                 <textarea
-                    value={currentComment}
+                    key={currentQ.id}
+                    defaultValue={comments[currentQ.id] || ""}
                     onChange={(e) => setCurrentComment(e.target.value)}
                     placeholder="このテーマについての具体的な考えや気になった点があれば自由に記載してください。"
                     className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"

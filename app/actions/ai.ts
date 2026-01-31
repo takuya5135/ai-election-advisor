@@ -75,6 +75,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
 
     タスク:
     上記の方針と**実際の争点**に基づき、**20問**の質問を作成してください。
+    各質問には、必ず一意のID（例: q1, q2, q3...）を付与してください。
     一般的な政治観だけでなく、**「${electionName}」で実際に議論されている具体的な政策（例えば${electionContext.slice(0, 20)}...など）**についての賛否を問う質問を必ず含めてください。
     
     各質問には、ユーザーが判断するための材料として、以下の詳細な分析（analysis）を必ず付与してください。
@@ -109,7 +110,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
 
     タスク:
     ユーザーの政治的スタンスをより明確にするために、**追加で5問〜10問**の新しい質問を作成してください。
-    これまで聞いていない視点（例えば、より抽象的な国家観や、具体的な外交政策の踏み込んだ内容など）を補完してください。
+    各質問には、以前の質問と重複しない一意のID（例: add_q1, add_q2...）を必ず付与してください。
     詳細な分析（analysis）も同様に付与してください。
     `;
 
