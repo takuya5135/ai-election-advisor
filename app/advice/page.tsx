@@ -32,9 +32,13 @@ export default function AdvicePage() {
         }
     }, [router]);
 
+    const handlePrint = () => {
+        window.print();
+    };
+
     return (
         <div className="max-w-3xl mx-auto space-y-8 py-8 animate-in fade-in duration-500">
-            <div className="bg-white p-6 md:p-10 rounded-xl shadow-lg border border-indigo-100">
+            <div className="bg-white p-6 md:p-10 rounded-xl shadow-lg border border-indigo-100 print:shadow-none print:border-none print:p-0">
                 <div className="flex items-center space-x-4 mb-6">
                     <div className="text-4xl">💡</div>
                     <h1 className="text-2xl font-bold text-gray-800">アドバイス結果</h1>
@@ -45,7 +49,14 @@ export default function AdvicePage() {
                 </div>
             </div>
 
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center space-x-4 print:hidden">
+                <button
+                    onClick={handlePrint}
+                    className="bg-indigo-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:bg-indigo-700 hover:scale-105 transition transform flex items-center space-x-2"
+                >
+                    <span>📄</span>
+                    <span>PDFで保存 / 印刷</span>
+                </button>
                 <button
                     onClick={() => router.push("/")}
                     className="bg-gray-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:bg-gray-700 hover:scale-105 transition transform"
@@ -54,9 +65,17 @@ export default function AdvicePage() {
                 </button>
             </div>
 
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm text-gray-500 print:mt-10">
                 ※ このアドバイスはAIによって生成された参考情報です。<br />最終的な投票判断はご自身の責任で行ってください。
             </p>
+
+            <style jsx global>{`
+                @media print {
+                    header, footer, nav { display: none !important; }
+                    body { background: white !important; }
+                    .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+                }
+            `}</style>
         </div>
     );
 }
