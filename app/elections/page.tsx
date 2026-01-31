@@ -7,7 +7,8 @@ import { findElections } from "@/app/actions/ai";
 type Election = {
     id: string;
     name: string;
-    date: string;
+    officialDate: string;
+    voteDate: string;
     description: string;
     level: "national" | "local";
 };
@@ -100,16 +101,17 @@ export default function ElectionSearchPage() {
                         onClick={() => handleSelectElection(election)}
                         className="flex flex-col text-left p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all group"
                     >
-                        <div className="flex justify-between items-start w-full mb-2">
-                            <span className={`px-2 py-1 text-xs font-bold rounded-md ${election.level === "national"
-                                    ? "bg-purple-100 text-purple-700"
-                                    : "bg-green-100 text-green-700"
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full mb-3 gap-2">
+                            <span className={`inline-block px-2 py-1 text-xs font-bold rounded-md w-fit ${election.level === "national"
+                                ? "bg-purple-100 text-purple-700"
+                                : "bg-green-100 text-green-700"
                                 }`}>
                                 {election.level === "national" ? "国政選挙" : "地方選挙"}
                             </span>
-                            <span className="text-sm text-gray-500 font-medium">
-                                {election.date}
-                            </span>
+                            <div className="text-sm text-gray-500 font-medium text-right flex flex-col items-start md:items-end">
+                                <span>公示: <span className="text-gray-900">{election.officialDate}</span></span>
+                                <span>投開票: <span className="text-red-600 font-bold">{election.voteDate}</span></span>
+                            </div>
                         </div>
                         <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-700 mb-2">
                             {election.name}
