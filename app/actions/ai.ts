@@ -24,7 +24,7 @@ const questionSchema = z.object({
                 dailyLife: z.string().describe("回答者の国民生活への具体的な影響"),
             }),
         }),
-    })).min(15).max(25), // Increased batch size to 20
+    })).min(5).max(25), // Support both full sets and additional small sets
 });
 
 // Helper for prompt construction
@@ -109,7 +109,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
     ${previousQuestions.map((q: any) => `- ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]} ${previousComments[q.id] ? `(コメント: ${previousComments[q.id]})` : ""}`).join("\n")}
 
     タスク:
-    ユーザーの政治的スタンスをより明確にするために、**追加で5問〜10問**の新しい質問を作成してください。
+    ユーザーの政治的スタンスをより明確にするために、これまでの回答を踏まえた**新しい追加の質問を5問以上**作成してください。
     各質問には、以前の質問と重複しない一意のID（例: add_q1, add_q2...）を必ず付与してください。
     詳細な分析（analysis）も同様に付与してください。
     `;
