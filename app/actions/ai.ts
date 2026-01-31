@@ -145,31 +145,44 @@ const electionSchema = z.object({
 export async function findElections(residence: string) {
     try {
         const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
-        const prompt = `
+
+        // Step 1: Raw Research with Search Grounding
+        const researchPrompt = `
     現在の日時は ${today} です。
-    あなたは日本の選挙制度により詳しいエキスパートです。
-    ユーザーの居住地「${residence}」に関連する、現在行われている、あるいは近い将来（1年以内）予定されている主要な選挙を3〜5件リストアップしてください。
+    ユーザーの居住地「${residence}」に関連する、現在行われている、あるいは近い将来予定されている主要な選挙をGoogle検索等の信頼できるソースから調査してください。
+    
+    特に以下を重点的に調べてください:
+    1. **国政選挙**: 近々行われる予定の衆議院議員総選挙や参議院議員通常選挙。
+    2. **地方選挙**: 居住地に関連する知事選、市長選、議会選挙。
+    3. **日程の確定度**: 公式な発表があるか、あるいは有力な報道があるか。
+    
+    複数の候補日がある場合は、最も公式に近いもの（選挙管理委員会 > 大手報道）を優先して整理してください。
+    `;
 
-    **【最重要】日付の特定について:**
-    - 今が2026年であれば、**「第51回衆議院議員総選挙」**が実施される可能性が高いです。
-    - 必ず**「第51回衆議院議員総選挙 公示日 投票日」**などで検索を行い、正確な日付（例: 2026年1月28日公示、2月8日投開票など）を特定してください。
-    - すでに公示されている、あるいは日程が報道されている場合、「未定」と答えることは**禁止**です。
-    - 地方選挙についても、自治体の選挙管理委員会サイトにある情報を検索して正確な日付を入れてください。
+        const { text: rawResearch } = await generateText({
+            // @ts-expect-error - search grounding
+            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
+            prompt: researchPrompt,
+        });
 
-    条件:
-    1. **日付の正確性**: 公示日（告示日）と投票日を「YYYY年M月D日」の形式で正確に特定する。
-    2. 対象: その地域で投票権があるもの（国政・都道府県・市区町村）。
-    3. 項目:
-       - name: 正式名称（例: 第51回衆議院議員総選挙、〇〇市長選挙）
-       - officialDate: 公示日/告示日
-       - voteDate: 投票日
+        // Step 2: Cross-Verification and Structured Extraction
+        const finalPrompt = `
+    現在の日時は ${today} です。
+    以下の調査資料に基づき、居住地「${residence}」のユーザーにとって重要な選挙を3〜5件、JSON形式で抽出してください。
+
+    【調査資料】
+    ${rawResearch}
+
+    【重要ルール】
+    1. **日付のダブルチェック**: 調査資料の中で日付が食い違っている場合、より信頼できるソースを選択してください。
+    2. **事実確認**: 2026年などの未来の日付については、ハルシネーション（嘘）を避け、必ず調査資料にある具体的な根拠に基づいた日付を入れてください。根拠がない場合は「未定」または「任期満了に基づく推定」であることを明記してください。
+    3. **出力形式**: schemaに従って正確に出力してください。
     `;
 
         const { object } = await generateObject({
-            // @ts-expect-error - search grounding
-            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
+            model: google("gemini-2.5-flash"),
             schema: electionSchema,
-            prompt: prompt,
+            prompt: finalPrompt,
         });
 
         return { success: true, data: object.elections };
