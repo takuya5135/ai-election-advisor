@@ -24,7 +24,7 @@ const questionSchema = z.object({
                 dailyLife: z.string().describe("回答者の国民生活への具体的な影響"),
             }),
         }),
-    })).min(5).max(25), // Support both full sets and additional small sets
+    })).min(5).max(30), // Support both full sets and additional small sets
 });
 
 // Helper for prompt construction
@@ -146,43 +146,56 @@ export async function findElections(residence: string) {
     try {
         const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
 
-        // Step 1: Raw Research with Search Grounding
-        const researchPrompt = `
+        // Step 1: Raw Research for National Elections
+        const nationalPrompt = `
     現在の日時は ${today} です。
-    居住地「${residence}」のユーザーに関係する「現在実施中」または「近い将来（半年〜1年以内）に予定されている」選挙を調査してください。
+    日本国内で行われる直近の**国政選挙（衆議院議員総選挙、参議院議員通常選挙）**を調査してください。
     
-    【最優先事項：国政および地方選挙の網羅的調査】
-    現在の日時（${today}）に基づき、居住地「${residence}」のユーザーが投票可能な全ての選挙を特定してください。
+    【調査対象】
+    - 第51回衆議院議員総選挙（解散日、公示日、投開票日）
+    - 直近の参議院議員通常選挙
     
-    1. **国政選挙**: 最も直近で行われる予定の衆院選・参院選。
-    2. **地方選挙（市区町村レベルまで）**: 
-       - ${residence}に関連する**都道府県・市区町村**の首長選挙（知事、市長、区長、町長、村長）。
-       - ${residence}に関連する**議会選挙**（都道府県議会、市区町村議会）。
-    
-    【調査の心得（厳守事項）】
-    - **信頼できるソースを最優先**: まず最初に「**選挙ドットコム (go2senkyo.com)**」、「**NHKの選挙特集ページ**」、「**各自治体の選挙管理委員会サイト**」を検索し、情報を取得してください。
-    - **「未定」の回避**: 解散が報道されている場合や日程が有力視されている場合、「未定」で済ませず、報じられている日付（例: 2026年1月27日公示、2月8日投開票など）を**具体的**に拾い上げてください。
-    - 既に終了した過去の選挙は除外してください。
-    - 日程の確定度（確定、有力、あるいは任期満了による推定）を明確に区別しつつ、可能な限り具体的な日付を特定してください。
+    【厳守事項】
+    - 「**選挙ドットコム (go2senkyo.com)**」などの一次ソースを優先してください。
+    - 2026年2月に行われる衆院選の情報があるはずです。必ず具体的な日付を特定してください。
     `;
 
-        const { text: rawResearch } = await generateText({
+        const { text: nationalResearch } = await generateText({
             // @ts-expect-error - search grounding
             model: google("gemini-2.5-flash", { useSearchGrounding: true }),
-            prompt: researchPrompt,
+            prompt: nationalPrompt,
         });
 
-        // Step 2: Cross-Verification and Structured Extraction
+        // Step 2: Raw Research for Local Elections
+        const localPrompt = `
+    現在の日時は ${today} です。
+    居住地「${residence}」のユーザーに関係する「現在実施中」または「近い将来（半年〜1年以内）に予定されている」**地方選挙**を調査してください。
+    
+    【調査対象】
+    - 都道府県、市区町村の首長・議会選挙
+    - 兵庫県西宮市などの具体的な自治体の選挙管理委員会サイトなどを参照してください。
+    `;
+
+        const { text: localResearch } = await generateText({
+            // @ts-expect-error - search grounding
+            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
+            prompt: localPrompt,
+        });
+
+        // Step 3: Cross-Verification and Structured Extraction
         const finalPrompt = `
     現在の日時は ${today} です。
-    以下の調査資料に基づき、居住地「${residence}」のユーザーにとって重要な選挙を3〜5件、JSON形式で抽出してください。
-
-    【調査資料】
-    ${rawResearch}
+    以下の調査資料に基づき、居住地「${residence}」のユーザーに関係する選挙を合計3〜5件、JSON形式で抽出してください。
+    
+    【国政選挙資料】
+    ${nationalResearch}
+    
+    【地方選挙資料】
+    ${localResearch}
 
     【重要ルール】
-    1. **日付のダブルチェック**: 調査資料の中で日付が食い違っている場合、より信頼できるソースを選択してください。
-    2. **事実確認**: 2026年などの未来の日付については、ハルシネーション（嘘）を避け、必ず調査資料にある具体的な根拠に基づいた日付を入れてください。根拠がない場合は「未定」または「任期満了に基づく推定」であることを明記してください。
+    1. **日付の優先順序**: 解散・公示・投票日が明記されている具体的な日付（例: 2月8日）を最優先してください。「未定」は可能な限り避け、報道された有力な日程を採用してください。
+    2. **事実確認**: 第51回衆議院議員総選挙が2026年2月8日に行われるという情報がある場合は、必ずそれを含めてください。
     3. **出力形式**: schemaに従って正確に出力してください。
     `;
 
