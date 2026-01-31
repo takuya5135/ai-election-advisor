@@ -17,12 +17,12 @@ export async function generateVoteAdvice(electionName: string, userProfile: any,
            - 候補者名、年齢、所属政党
            - **主な公約・政策**（具体的かつ詳細に）
            - **これまでの実績**
-           - **公式サイト・SNSのURL**（あれば）
+           - **公式サイトおよびSNSのURL**（必ずURLを探してください）
         
         2. **比例代表・政党情報**:
            - 主要政党の名称
            - **政策の柱・マニフェスト**
-           - **公式サイトのURL**
+           - **公式サイトのURL**（必ずURLを探してください）
            - **実績・理念**
            
         3. **選挙情勢**: 最新の支持率傾向や、いわゆる「当落線上の争い」などの情勢。
@@ -82,13 +82,13 @@ export async function generateVoteAdvice(electionName: string, userProfile: any,
     （候補者ごとに以下を記載）
     - **氏名**: [氏名]
     - **公約**: [具体的な公約]
-    - **公式サイト**: [URL]
+    - **公式サイト**: [公式サイト・SNS](URL) （※必ずMarkdownリンク形式で、実際のURLを入れてください。見つからない場合はリンクなしのURLテキストまたは「なし」と記載）
     
     ### [主要政党の情報]
     （政党ごとに以下を記載）
     - **政党名**: [名称]
     - **理念・政策**: [理念や重要政策]
-    - **公式サイト**: [URL]
+    - **公式サイト**: [公式サイト](URL) （※必ずMarkdownリンク形式で、実際のURLを入れてください）
     `;
 
         const { text } = await generateText({

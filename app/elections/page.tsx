@@ -84,6 +84,17 @@ export default function ElectionSearchPage() {
         );
     }
 
+    const [isManualMode, setIsManualMode] = useState(false);
+    const [manualName, setManualName] = useState("");
+
+    const handleManualSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (manualName.trim()) {
+            localStorage.setItem("target_election", manualName.trim());
+            router.push("/questions/generate");
+        }
+    };
+
     return (
         <div className="max-w-3xl mx-auto py-8 px-4 space-y-8">
             <div className="space-y-2">
@@ -123,7 +134,50 @@ export default function ElectionSearchPage() {
                 ))}
             </div>
 
-            <div className="mt-8 text-center">
+            {!isManualMode ? (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <p className="text-sm text-gray-500 mb-2">希望の選挙が一覧にありませんか？</p>
+                    <button
+                        onClick={() => setIsManualMode(true)}
+                        className="text-blue-600 font-medium hover:underline text-sm"
+                    >
+                        + 選挙名を手動で入力する
+                    </button>
+                </div>
+            ) : (
+                <form onSubmit={handleManualSubmit} className="mt-4 p-6 bg-blue-50 rounded-xl border border-blue-200 space-y-4">
+                    <label className="block text-sm font-bold text-blue-800">
+                        選挙名を手動入力
+                    </label>
+                    <input
+                        type="text"
+                        value={manualName}
+                        onChange={(e) => setManualName(e.target.value)}
+                        placeholder="例: 第51回衆議院議員総選挙"
+                        className="w-full p-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        autoFocus
+                    />
+                    <div className="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setIsManualMode(false)}
+                            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                        >
+                            キャンセル
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={!manualName.trim()}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            この選挙で進む
+                        </button>
+                    </div>
+                </form>
+            )}
+
+            <div className="mt-8 text-center space-y-4">
+                <hr className="border-gray-200" />
                 <button
                     onClick={() => router.push("/profile")}
                     className="text-sm text-gray-500 hover:text-gray-800 underline"
