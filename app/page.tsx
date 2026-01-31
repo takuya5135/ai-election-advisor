@@ -30,31 +30,17 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="w-full max-w-md p-6 bg-white rounded-xl shadow-lg border border-slate-200">
-        <form onSubmit={handleStart} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="election" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              どの選挙について調べますか？
-            </label>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <input
-                id="election"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-9"
-                placeholder="例: 東京都知事選挙、第50回衆議院議員総選挙"
-                value={electionQuery}
-                onChange={(e) => setElectionQuery(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 py-2 w-full"
-          >
-            次へ進む
-          </button>
-        </form>
+      <div className="w-full max-w-md p-6 bg-white rounded-xl shadow-lg border border-slate-200 text-center">
+        <p className="mb-6 text-gray-600">
+          まずはあなたのことについて教えてください。<br />
+          居住地に合わせて最適な選挙を提案します。
+        </p>
+        <button
+          onClick={() => router.push("/profile")}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 h-12 px-8 py-2 w-full text-lg shadow-md"
+        >
+          はじめる（プロフィール設定）
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl text-center mt-8">

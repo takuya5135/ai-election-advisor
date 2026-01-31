@@ -101,3 +101,39 @@ export async function generateAdditionalQuestions(electionName: string, userProf
         return { success: false, error: "Additional AI Generation Failed" };
     }
 }
+
+// Schema for finding elections
+const electionSchema = z.object({
+    elections: z.array(z.object({
+        id: z.string(),
+        name: z.string().describe("選挙の正式名称"),
+        date: z.string().describe("投票日または「調整中」「任期満了日」などの時期"),
+        description: z.string().describe("選挙の概要（何を決める選挙か）"),
+        level: z.enum(["national", "local"]).describe("国政選挙か地方選挙か"),
+    })).min(1).max(5),
+});
+
+export async function findElections(residence: string) {
+    try {
+        const prompt = `
+    あなたは日本の選挙制度に詳しいアシスタントです。
+    ユーザーの居住地「${residence}」に関連する、現在行われている、あるいは近い将来（1年以内）予定されている主要な選挙を3〜5件リストアップしてください。
+    
+    条件:
+    1. その地域で投票権がある可能性が高いもの（都道府県知事選、市区町村長選、議会選、または衆参の国政選挙）。
+    2. もし直近で具体的な選挙がない場合は、「次期衆議院議員総選挙」や、その自治体の「次期首長選挙（任期満了に伴う）」などを挙げてください。
+    3. 過去の選挙は含めないでください。
+    `;
+
+        const { object } = await generateObject({
+            model: google("gemini-1.5-flash-001"),
+            schema: electionSchema,
+            prompt: prompt,
+        });
+
+        return { success: true, data: object.elections };
+    } catch (error) {
+        console.error("Election Search Error:", error);
+        return { success: false, error: "Election Search Failed" };
+    }
+}

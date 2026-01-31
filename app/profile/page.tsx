@@ -15,18 +15,18 @@ export default function ProfilePage() {
     const [electionName, setElectionName] = useState("");
 
     useEffect(() => {
-        const storedElection = localStorage.getItem("target_election");
-        if (!storedElection) {
-            router.push("/");
-        } else {
-            setElectionName(storedElection);
+        // Load stored profile if available
+        const storedProfile = localStorage.getItem("user_profile");
+        if (storedProfile) {
+            setFormData(JSON.parse(storedProfile));
         }
-    }, [router]);
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // Save profile for future
         localStorage.setItem("user_profile", JSON.stringify(formData));
-        router.push("/questions/generate"); // Next step: Generate questions
+        router.push("/elections"); // Next step: Select election based on residence
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -39,12 +39,9 @@ export default function ProfilePage() {
             <div className="space-y-2">
                 <h2 className="text-2xl font-bold">プロフィール設定</h2>
                 <p className="text-gray-600">
-                    より正確なアドバイスを行うため、あなたの状況を教えてください。<br />
-                    （入力された情報は、アドバイスの生成のみに使用されます）
+                    あなたの状況に合わせて、最適な選挙情報とアドバイスを提供します。<br />
+                    入力情報はブラウザに保存され、後で変更も可能です。
                 </p>
-                <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm font-medium">
-                    対象の選挙: {electionName}
-                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
