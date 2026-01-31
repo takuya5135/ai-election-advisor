@@ -23,10 +23,11 @@ type Question = {
     id: string;
     text: string;
     category: string;
-    analysis?: Analysis; // Optional to be safe with old data, though generally present now
+    questionType?: "standard" | "administration_evaluation";
+    analysis?: Analysis;
 };
 
-type Answer = "agree" | "neutral" | "disagree" | "unknown";
+type Answer = "agree" | "neutral" | "disagree" | "unknown" | 1 | 2 | 3 | 4 | 5;
 
 export default function QuestionsPage() {
     const router = useRouter();
@@ -240,32 +241,58 @@ export default function QuestionsPage() {
             </div>
 
             {/* Answer Options */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <button
-                    onClick={() => handleAnswer("agree")}
-                    className="p-4 border-2 border-blue-100 bg-blue-50/50 rounded-xl hover:bg-blue-100 hover:border-blue-500 transition-all text-blue-900 font-bold"
-                >
-                    ◯ 共感する
-                </button>
-                <button
-                    onClick={() => handleAnswer("disagree")}
-                    className="p-4 border-2 border-red-100 bg-red-50/50 rounded-xl hover:bg-red-100 hover:border-red-500 transition-all text-red-900 font-bold"
-                >
-                    ✕ 共感しない
-                </button>
-                <button
-                    onClick={() => handleAnswer("neutral")}
-                    className="p-4 border-2 border-gray-100 bg-gray-50/50 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all text-gray-700 font-medium"
-                >
-                    △ どちらでもない
-                </button>
-                <button
-                    onClick={() => handleAnswer("unknown")}
-                    className="p-4 border-2 border-slate-200 bg-slate-100 rounded-xl hover:bg-slate-200 hover:border-slate-400 transition-all text-slate-600 font-medium"
-                >
-                    ？ 分からない・関心ない
-                </button>
-            </div>
+            {currentQ.questionType === "administration_evaluation" ? (
+                <div className="space-y-6">
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex justify-between text-xs font-bold text-gray-500 px-2 uppercase tracking-tighter">
+                            <span>1: 全く支持しない</span>
+                            <span>3: どちらでもない</span>
+                            <span>5: 強く支持する</span>
+                        </div>
+                        <div className="grid grid-cols-5 gap-2">
+                            {[1, 2, 3, 4, 5].map((num) => (
+                                <button
+                                    key={num}
+                                    onClick={() => handleAnswer(num as Answer)}
+                                    className={`p-6 text-xl font-bold rounded-xl transition-all border-2 ${answers[currentQ.id] === num
+                                        ? "bg-blue-600 border-blue-600 text-white shadow-lg scale-105"
+                                        : "bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:bg-blue-50"
+                                        }`}
+                                >
+                                    {num}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <button
+                        onClick={() => handleAnswer("agree")}
+                        className="p-4 border-2 border-blue-100 bg-blue-50/50 rounded-xl hover:bg-blue-100 hover:border-blue-500 transition-all text-blue-900 font-bold"
+                    >
+                        ◯ 共感する
+                    </button>
+                    <button
+                        onClick={() => handleAnswer("disagree")}
+                        className="p-4 border-2 border-red-100 bg-red-50/50 rounded-xl hover:bg-red-100 hover:border-red-500 transition-all text-red-900 font-bold"
+                    >
+                        ✕ 共感しない
+                    </button>
+                    <button
+                        onClick={() => handleAnswer("neutral")}
+                        className="p-4 border-2 border-gray-100 bg-gray-50/50 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all text-gray-700 font-medium"
+                    >
+                        △ どちらでもない
+                    </button>
+                    <button
+                        onClick={() => handleAnswer("unknown")}
+                        className="p-4 border-2 border-slate-200 bg-slate-100 rounded-xl hover:bg-slate-200 hover:border-slate-400 transition-all text-slate-600 font-medium"
+                    >
+                        ？ 分からない・関心ない
+                    </button>
+                </div>
+            )}
 
             {/* Navigation (Back) */}
             <div className="flex justify-start">

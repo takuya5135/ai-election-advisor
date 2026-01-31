@@ -58,6 +58,7 @@ export default function ElectionSearchPage() {
 
     const handleSelectElection = (election: Election) => {
         localStorage.setItem("target_election", election.name);
+        localStorage.setItem("target_election_level", election.level);
         router.push("/questions/generate");
     };
 
@@ -91,6 +92,10 @@ export default function ElectionSearchPage() {
         e.preventDefault();
         if (manualName.trim()) {
             localStorage.setItem("target_election", manualName.trim());
+            // Default to national for manual entries as they are usually major national ones, 
+            // or we could add a toggle. For now, let's assume if it contains "衆" "参" it's national.
+            const level = (manualName.includes("衆") || manualName.includes("参")) ? "national" : "local";
+            localStorage.setItem("target_election_level", level);
             router.push("/questions/generate");
         }
     };

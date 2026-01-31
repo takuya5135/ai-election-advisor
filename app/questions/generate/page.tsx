@@ -25,7 +25,8 @@ export default function GenerateQuestionsPage() {
             setStatus("政治的スタンスを判定する質問を作成中...");
 
             try {
-                const result = await generateElectionQuestions(electionStr, JSON.parse(profileStr));
+                const level = localStorage.getItem("target_election_level") || undefined;
+                const result = await generateElectionQuestions(electionStr, JSON.parse(profileStr), level);
 
                 if (result.success && result.data) {
                     localStorage.setItem("generated_questions", JSON.stringify(result.data));

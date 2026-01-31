@@ -10,10 +10,11 @@ const questionSchema = z.object({
         id: z.string(),
         text: z.string(),
         category: z.string(),
+        questionType: z.enum(["standard", "administration_evaluation"]).default("standard").describe("質問のタイプ"),
         analysis: z.object({
-            merit: z.string().describe("この政策を実行した際のメリット"),
-            demerit: z.string().describe("この政策を実行した際のデメリット"),
-            background: z.string().describe("この政策が政治課題になっている背景"),
+            merit: z.string().describe("この政策を実行した際のメリット（または政権の功績）"),
+            demerit: z.string().describe("この政策を実行した際のデメリット（または政権の罪）"),
+            background: z.string().describe("この政策が政治課題になっている背景（または政権評価の争点）"),
             impact: z.object({
                 global: z.string().describe("世界への影響"),
                 national: z.string().describe("自国への影響"),
@@ -24,7 +25,7 @@ const questionSchema = z.object({
                 dailyLife: z.string().describe("回答者の国民生活への具体的な影響"),
             }),
         }),
-    })).min(5).max(30), // Support both full sets and additional small sets
+    })).min(5).max(30),
 });
 
 // Helper for prompt construction
@@ -47,7 +48,7 @@ const getBasePrompt = (electionName: string, userProfile: any) => `
     これらをバランスよく組み合わせ、ユーザーの深層心理を「共感度」で浮き彫りにする質問にしてください。
     `;
 
-export async function generateElectionQuestions(electionName: string, userProfile: any) {
+export async function generateElectionQuestions(electionName: string, userProfile: any, electionLevel?: string) {
     try {
         // Step 1: Research the election context
         // Enable search grounding to get the latest implementation details
@@ -56,8 +57,15 @@ export async function generateElectionQuestions(electionName: string, userProfil
         あなたは${electionName}のエキスパートです。
         以下の情報を、Google検索等の信頼できるソースから検索し、具体的にリストアップしてください。
 
-        1. **主要な争点**: 今この選挙で問われている具体的な政策課題（例: 物価高対策、社会保険料、外交安保など）。
-        2. **候補者・政党の対立軸**: どの候補/政党が何と言って対立しているか。
+        ${electionLevel === "national" ? `
+        3. **現政権の部門別評価**: 
+           - 以下の5項目それぞれについて、現政権の功罪、実績、および今回の選挙での具体的な争点を総括してください：
+             1. 経済・財政（国民の生活実感、物価高対策など）
+             2. 外交・安全保障（国際的地位、国防、同盟関係など）
+             3. 社会保障・内政（少子高齢化、国内インフラ、地方創生など）
+             4. 政治姿勢・統治能力（政治資金問題、実行力、信頼性など）
+             5. 多様性・人権・価値観（選択的夫婦別姓、LGBTQ+、社会の成熟度など）
+        ` : ""}
         `;
 
         const { text: electionContext } = await generateText({
@@ -82,6 +90,19 @@ export async function generateElectionQuestions(electionName: string, userProfil
     - メリット・デメリットの公平な分析
     - 政治課題となっている背景
     - 各分野（世界、自国、社会、経済、福祉、国民生活）への具体的な影響
+
+    ${electionLevel === "national" ? `
+    【特別タスク: 部門別政権評価質問】
+    - 以下の5つの部門それぞれについて、現在の政権を総合的に評価することを促す質問（questionType: "administration_evaluation"）を、既存の20問とは別に、あるいはその一部として**必ず合計5問**作成してください。
+    - 各質問のIDはそれぞれ 'admin_econ', 'admin_diplomacy', 'admin_social', 'admin_governance', 'admin_values' としてください。
+    - 各質問のテキストは、ユーザーにその部門での政権の実績・姿勢を5段階で問うものにしてください。
+      1. 'admin_econ': 「経済・財政政策（生活実感や物価高対応など）における現政権の実績を、あなたはどの程度評価しますか？」
+      2. 'admin_diplomacy': 「外交・安全保障（国際的地位や安全維持など）における現政権の姿勢を、あなたはどの程度評価しますか？」
+      3. 'admin_social': 「社会保障・内政（子育て支援や地方創生など）における現政権の取り組みを、あなたはどの程度評価しますか？」
+      4. 'admin_governance': 「政治姿勢・統治能力（信頼性や実行力など）における現政権のあり方を、あなたはどの程度評価しますか？」
+      5. 'admin_values': 「多様性・人権・価値観（ジェンダーやマイノリティ権利など）における現政権の社会観を、あなたはどの程度評価しますか？」
+    - 各質問の分析(analysis)には、上述の「現政権の部門別評価」のリサーチ結果に基づき、その部門における具体的な功罪と争点を記載してください。
+    ` : ""}
     `;
 
         const { object } = await generateObject({
@@ -103,19 +124,22 @@ export async function generateAdditionalQuestions(electionName: string, userProf
     ${getBasePrompt(electionName, userProfile)}
 
     現在の状況:
-    ユーザーは既に以下の質問に回答しました。ここでユーザーが「分からない」と答えたり、コメントで特定の関心を示している場合は、そこを深掘りしてください。
+    ユーザーは既に以下の質問に回答しました。追加の質問を作成する際は、以下の点に厳守してください：
+    1. **既出の質問と重複しない内容にすること**: 下記のリストにある既出の質問文やその意図と**重複する質問は絶対に避けてください**。全く新しい角度から質問してください。
+    2. **基本的な政治スタンスの深掘り**: 「大きな政府か小さな政府か（公助か自助か）」「自由競争（新自由主義）か公平性（再分配）か」「伝統的価値観か多様性か」といった、より根本的な政治思想や哲学を問う質問を重点的に増やしてください。
+    3. **ユーザーの反応に合わせた深掘り**: ユーザーが「分からない」と答えたり、コメントで特定の関心を示している場合は、そこを分かりやすく噛み砕いて深掘りしてください。
 
     これまでの質問と回答・コメント:
-    ${previousQuestions.map((q: any) => `- ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]} ${previousComments[q.id] ? `(コメント: ${previousComments[q.id]})` : ""}`).join("\n")}
+    ${previousQuestions.map((q: any) => `- [${q.id}] ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]} ${previousComments[q.id] ? `(コメント: ${previousComments[q.id]})` : ""}`).join("\n")}
 
     タスク:
-    ユーザーの政治的スタンスをより明確にするために、これまでの回答を踏まえた**新しい追加の質問を5問以上**作成してください。
-    各質問には、以前の質問と重複しない一意のID（例: add_q1, add_q2...）を必ず付与してください。
+    ユーザーの政治的スタンス（特に根本的な思想）をより鮮明に浮き彫りにするため、これまでの回答を踏まえた **新しい追加の質問を5問〜8問** 作成してください。
+    各質問には、以前の質問と重複しない一意のID（例: add_q_${Date.now()}_1, add_q_${Date.now()}_2...）を必ず付与してください。
     詳細な分析（analysis）も同様に付与してください。
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.5-flash"),
+            model: google("gemini-2.0-flash"), // Schema generation using Flash
             schema: questionSchema,
             prompt: prompt,
         });
@@ -149,7 +173,7 @@ export async function findElections(residence: string) {
         // Step 1: Raw Research for National Elections
         const nationalPrompt = `
     現在の日時は ${today} です。
-    日本国内で行われる直近の**国政選挙（衆議院議員総選挙、参議院議員通常選挙）**を調査してください。
+    日本国内で行われる直近の ** 国政選挙（衆議院議員総選挙、参議院議員通常選挙）** を調査してください。
     
     【最優先・厳守ソース】
     以下のURLを「ソースの真実」として最優先で参照し、情報を取得してください：
@@ -158,9 +182,9 @@ export async function findElections(residence: string) {
     3. https://go2senkyo.com/schedule (全体スケジュール)
     
     【調査対象と期待される結果】
-    - **第51回衆議院議員総選挙**: 上記ソースに従い、正確な「公示日」と「投開票日」を特定してください。
-      - 注意：2026年2月8日が投開票日として記載されている可能性が高いです。他の日付（2月22日など）と混同しないでください。
-    - **参議院議員通常選挙**: 直近の予定を特定してください。
+    - ** 第51回衆議院議員総選挙 **: 上記ソースに従い、正確な「公示日」と「投開票日」を特定してください。
+    - 注意：2026年2月8日が投開票日として記載されている可能性が高いです。他の日付（2月22日など）と混同しないでください。
+    - ** 参議院議員通常選挙 **: 直近の予定を特定してください。
     `;
 
         const { text: nationalResearch } = await generateText({
@@ -172,7 +196,7 @@ export async function findElections(residence: string) {
         // Step 2: Raw Research for Local Elections
         const localPrompt = `
     現在の日時は ${today} です。
-    居住地「${residence}」のユーザーに関係する「現在実施中」または「近い将来（半年〜1年以内）に予定されている」**地方選挙**を調査してください。
+    居住地「${residence}」のユーザーに関係する「現在実施中」または「近い将来（半年〜1年以内）に予定されている」** 地方選挙 ** を調査してください。
     
     【最優先・厳守ソース】
     1. https://go2senkyo.com/local
@@ -201,9 +225,9 @@ export async function findElections(residence: string) {
     ${localResearch}
 
     【重要ルール】
-    1. **日付の優先順序**: 解散・公示・投票日が明記されている具体的な日付（例: 2月8日）を最優先してください。「未定」は可能な限り避け、報道された有力な日程を採用してください。
-    2. **事実確認**: 第51回衆議院議員総選挙が2026年2月8日に行われるという情報がある場合は、必ずそれを含めてください。
-    3. **出力形式**: schemaに従って正確に出力してください。
+    1. ** 日付の優先順序 **: 解散・公示・投票日が明記されている具体的な日付（例: 2月8日）を最優先してください。「未定」は可能な限り避け、報道された有力な日程を採用してください。
+    2. ** 事実確認 **: 第51回衆議院議員総選挙が2026年2月8日に行われるという情報がある場合は、必ずそれを含めてください。
+    3. ** 出力形式 **: schemaに従って正確に出力してください。
     `;
 
         const { object } = await generateObject({
