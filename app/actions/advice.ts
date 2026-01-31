@@ -27,7 +27,7 @@ export async function generateVoteAdvice(electionName: string, userProfile: any,
     `;
 
         const { text } = await generateText({
-            model: google("gemini-1.5-flash"),
+            model: google("gemini-1.5-flash-001"),
             prompt: prompt,
         });
 

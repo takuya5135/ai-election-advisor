@@ -57,7 +57,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-1.5-flash"),
+            model: google("gemini-1.5-flash-001"),
             schema: questionSchema,
             prompt: prompt,
         });
@@ -87,7 +87,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-1.5-flash"),
+            model: google("gemini-1.5-flash-001"),
             schema: questionSchema,
             prompt: prompt,
         });
