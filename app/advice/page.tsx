@@ -6,17 +6,21 @@ import ReactMarkdown from "react-markdown"; // Note: might need to install this 
 
 // Simple Markdown renderer component since we didn't install react-markdown to keep deps light
 function MarkdownRenderer({ content }: { content: string }) {
-    // Very basic splitting for demo. In production, use react-markdown
-    const sections = content.split("\n").map((line, i) => {
-        if (line.startsWith("### ")) return <h3 key={i} className="text-lg font-bold mt-4 mb-2">{line.replace("### ", "")}</h3>;
-        if (line.startsWith("## ")) return <h2 key={i} className="text-xl font-bold mt-6 mb-3 border-b pb-1">{line.replace("## ", "")}</h2>;
-        if (line.startsWith("# ")) return <h1 key={i} className="text-2xl font-bold mt-8 mb-4">{line.replace("# ", "")}</h1>;
-        if (line.startsWith("- ")) return <li key={i} className="ml-4 list-disc mb-1">{line.replace("- ", "")}</li>;
-        if (line.trim() === "") return <div key={i} className="h-2"></div>;
-        return <p key={i} className="mb-2 leading-relaxed">{line}</p>;
-    });
-
-    return <div>{sections}</div>;
+    return (
+        <div className="markdown-content">
+            <ReactMarkdown>{content}</ReactMarkdown>
+            <style jsx global>{`
+                .markdown-content h1 { font-size: 1.5rem; font-weight: bold; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+                .markdown-content h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
+                .markdown-content h3 { font-size: 1.125rem; font-weight: bold; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+                .markdown-content p { margin-bottom: 1rem; line-height: 1.7; }
+                .markdown-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+                .markdown-content li { margin-bottom: 0.25rem; }
+                .markdown-content a { color: #4f46e5; text-decoration: underline; font-weight: 500; }
+                .markdown-content a:hover { color: #4338ca; }
+            `}</style>
+        </div>
+    );
 }
 
 export default function AdvicePage() {
