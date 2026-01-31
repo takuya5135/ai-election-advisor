@@ -8,10 +8,6 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "AI選挙アドバイザー",
   description: "あなたの価値観に合った投票先をAIがアドバイスします",
-  icons: {
-    icon: "/favicon.ico", // Standard Next.js public path
-    apple: "/apple-touch-icon.png",
-  },
 };
 
 export default function RootLayout({

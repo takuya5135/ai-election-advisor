@@ -60,7 +60,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
 
         const { text: electionContext } = await generateText({
             // @ts-expect-error - The installed version's types might not support the settings object yet, but runtime should.
-            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
+            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
@@ -82,7 +82,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.0-flash"), // Schema generation using Flash
+            model: google("gemini-2.5-flash"), // Schema generation using Flash
             schema: questionSchema,
             prompt: prompt,
         });
@@ -112,7 +112,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.0-flash"),
+            model: google("gemini-2.5-flash"),
             schema: questionSchema,
             prompt: prompt,
         });
@@ -164,7 +164,7 @@ export async function findElections(residence: string) {
 
         const { object } = await generateObject({
             // @ts-expect-error - search grounding
-            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
+            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
             schema: electionSchema,
             prompt: prompt,
         });
