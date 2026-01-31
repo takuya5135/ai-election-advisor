@@ -14,6 +14,7 @@ export default function AdviceGeneratePage() {
             const electionStr = localStorage.getItem("target_election");
             const questionsStr = localStorage.getItem("generated_questions");
             const answersStr = localStorage.getItem("user_answers");
+            const commentsStr = localStorage.getItem("user_comments") || "{}";
 
             if (!profileStr || !electionStr || !questionsStr || !answersStr) {
                 router.push("/");
@@ -25,7 +26,8 @@ export default function AdviceGeneratePage() {
                     electionStr,
                     JSON.parse(profileStr),
                     JSON.parse(questionsStr),
-                    JSON.parse(answersStr)
+                    JSON.parse(answersStr),
+                    JSON.parse(commentsStr)
                 );
 
                 if (result.success && result.advice) {

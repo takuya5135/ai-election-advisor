@@ -14,6 +14,7 @@ type Analysis = {
         social: string;
         economic: string;
         welfare: string;
+        culture: string;
         dailyLife: string;
     };
 };
@@ -25,12 +26,14 @@ type Question = {
     analysis?: Analysis; // Optional to be safe with old data, though generally present now
 };
 
-type Answer = "agree" | "neutral" | "disagree";
+type Answer = "agree" | "neutral" | "disagree" | "unknown";
 
 export default function QuestionsPage() {
     const router = useRouter();
     const [questions, setQuestions] = useState<Question[]>([]);
     const [answers, setAnswers] = useState<Record<string, Answer>>({});
+    const [comments, setComments] = useState<Record<string, string>>({});
+    const [currentComment, setCurrentComment] = useState("");
     const [currentStep, setCurrentStep] = useState(0);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [showAnalysis, setShowAnalysis] = useState(false);
@@ -38,28 +41,37 @@ export default function QuestionsPage() {
     useEffect(() => {
         const stored = localStorage.getItem("generated_questions");
         const storedAnswers = localStorage.getItem("user_answers");
+        const storedComments = localStorage.getItem("user_comments");
         if (!stored) {
             router.push("/");
             return;
         }
         setQuestions(JSON.parse(stored));
-        if (storedAnswers) {
-            setAnswers(JSON.parse(storedAnswers));
-        }
+        if (storedAnswers) setAnswers(JSON.parse(storedAnswers));
+        if (storedComments) setComments(JSON.parse(storedComments));
     }, [router]);
+
+    // Reset local comment input when step changes
+    useEffect(() => {
+        if (questions[currentStep]) {
+            setCurrentComment(comments[questions[currentStep].id] || "");
+        }
+    }, [currentStep, questions, comments]);
 
     const handleAnswer = (val: Answer) => {
         if (!questions[currentStep]) return;
 
-        // Save answer
-        const newAnswers = {
-            ...answers,
-            [questions[currentStep].id]: val
-        };
-        setAnswers(newAnswers);
+        // Save answer and comment
+        const currentQId = questions[currentStep].id;
+        const newAnswers = { ...answers, [currentQId]: val };
+        const newComments = { ...comments, [currentQId]: currentComment };
 
-        // Persist progress
+        setAnswers(newAnswers);
+        setComments(newComments);
+
+        // Persist
         localStorage.setItem("user_answers", JSON.stringify(newAnswers));
+        localStorage.setItem("user_comments", JSON.stringify(newComments));
 
         if (currentStep < questions.length - 1) {
             setCurrentStep(prev => prev + 1);
@@ -78,7 +90,7 @@ export default function QuestionsPage() {
         const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
         const election = localStorage.getItem("target_election") || "";
 
-        const result = await generateAdditionalQuestions(election, profile, questions, answers);
+        const result = await generateAdditionalQuestions(election, profile, questions, answers, comments);
 
         if (result.success && result.data) {
             const newQuestions = [...questions, ...result.data];
@@ -190,6 +202,7 @@ export default function QuestionsPage() {
                                             <li><span className="font-semibold">経済:</span> {currentQ.analysis.impact.economic}</li>
                                             <li><span className="font-semibold">社会:</span> {currentQ.analysis.impact.social}</li>
                                             <li><span className="font-semibold">福祉:</span> {currentQ.analysis.impact.welfare}</li>
+                                            <li><span className="font-semibold">文化:</span> {currentQ.analysis.impact.culture}</li>
                                             <li><span className="font-semibold">自国:</span> {currentQ.analysis.impact.national}</li>
                                             <li><span className="font-semibold">世界:</span> {currentQ.analysis.impact.global}</li>
                                         </ul>
@@ -201,13 +214,32 @@ export default function QuestionsPage() {
                 </div>
             </div>
 
+            {/* Comment Box */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                    コメント・メモ（任意）
+                </label>
+                <textarea
+                    value={currentComment}
+                    onChange={(e) => setCurrentComment(e.target.value)}
+                    placeholder="このテーマについての具体的な考えや気になった点があれば自由に記載してください。"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"
+                />
+            </div>
+
             {/* Answer Options */}
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                     onClick={() => handleAnswer("agree")}
                     className="p-4 border-2 border-blue-100 bg-blue-50/50 rounded-xl hover:bg-blue-100 hover:border-blue-500 transition-all text-blue-900 font-bold"
                 >
                     ◯ 共感する
+                </button>
+                <button
+                    onClick={() => handleAnswer("disagree")}
+                    className="p-4 border-2 border-red-100 bg-red-50/50 rounded-xl hover:bg-red-100 hover:border-red-500 transition-all text-red-900 font-bold"
+                >
+                    ✕ 共感しない
                 </button>
                 <button
                     onClick={() => handleAnswer("neutral")}
@@ -216,10 +248,10 @@ export default function QuestionsPage() {
                     △ どちらでもない
                 </button>
                 <button
-                    onClick={() => handleAnswer("disagree")}
-                    className="p-4 border-2 border-red-100 bg-red-50/50 rounded-xl hover:bg-red-100 hover:border-red-500 transition-all text-red-900 font-bold"
+                    onClick={() => handleAnswer("unknown")}
+                    className="p-4 border-2 border-slate-200 bg-slate-100 rounded-xl hover:bg-slate-200 hover:border-slate-400 transition-all text-slate-600 font-medium"
                 >
-                    ✕ 共感しない
+                    ？ 分からない・関心ない
                 </button>
             </div>
 

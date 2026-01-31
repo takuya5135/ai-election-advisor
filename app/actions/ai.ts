@@ -1,6 +1,6 @@
 "use server";
 
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 
@@ -20,10 +20,11 @@ const questionSchema = z.object({
                 social: z.string().describe("社会への影響"),
                 economic: z.string().describe("経済への影響"),
                 welfare: z.string().describe("福祉への影響"),
+                culture: z.string().describe("文化への影響"),
                 dailyLife: z.string().describe("回答者の国民生活への具体的な影響"),
             }),
         }),
-    })).min(5).max(15), // Initial batch size (adjustable)
+    })).min(15).max(25), // Increased batch size to 20
 });
 
 // Helper for prompt construction
@@ -45,11 +46,31 @@ ${JSON.stringify(userProfile)}
 
 export async function generateElectionQuestions(electionName: string, userProfile: any) {
     try {
+        // Step 1: Research the election context
+        const researchPrompt = `
+        あなたは${electionName}のエキスパートです。
+        以下の情報を知識ベースから検索し、具体的にリストアップしてください。
+        
+        1. **主要な争点**: 今この選挙で問われている具体的な政策課題（例: 消費税増税、原発再稼働、子育て支援の財源など）。
+        2. **候補者・政党の対立軸**: どの候補/政党が何と言って対立しているか。
+        `;
+
+        const { text: electionContext } = await generateText({
+            model: google("gemini-2.0-flash"),
+            prompt: researchPrompt,
+        });
+
+        // Step 2: Generate Questions based on Context
         const prompt = `
     ${getBasePrompt(electionName, userProfile)}
 
+    【選挙の具体的背景（主要な争点）】
+    ${electionContext}
+
     タスク:
-    上記の方針に基づき、**10問程度**の質問を作成してください。
+    上記の方針と**実際の争点**に基づき、**20問**の質問を作成してください。
+    一般的な政治観だけでなく、**「${electionName}」で実際に議論されている具体的な政策（例えば${electionContext.slice(0, 20)}...など）**についての賛否を問う質問を必ず含めてください。
+    
     各質問には、ユーザーが判断するための材料として、以下の詳細な分析（analysis）を必ず付与してください。
     - メリット・デメリットの公平な分析
     - 政治課題となっている背景
@@ -69,16 +90,16 @@ export async function generateElectionQuestions(electionName: string, userProfil
     }
 }
 
-export async function generateAdditionalQuestions(electionName: string, userProfile: any, previousQuestions: any[], previousAnswers: any) {
+export async function generateAdditionalQuestions(electionName: string, userProfile: any, previousQuestions: any[], previousAnswers: any, previousComments: any) {
     try {
         const prompt = `
     ${getBasePrompt(electionName, userProfile)}
 
     現在の状況:
-    ユーザーは既に以下の質問に回答しましたが、まだ判定には情報が不足している、あるいはユーザー自身がより深い分析を求めています。
+    ユーザーは既に以下の質問に回答しました。ここでユーザーが「分からない」と答えたり、コメントで特定の関心を示している場合は、そこを深掘りしてください。
 
-    これまでの質問と回答:
-    ${previousQuestions.map((q: any) => `- ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]}`).join("\n")}
+    これまでの質問と回答・コメント:
+    ${previousQuestions.map((q: any) => `- ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]} ${previousComments[q.id] ? `(コメント: ${previousComments[q.id]})` : ""}`).join("\n")}
 
     タスク:
     ユーザーの政治的スタンスをより明確にするために、**追加で5問〜10問**の新しい質問を作成してください。
