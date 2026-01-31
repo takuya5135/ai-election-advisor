@@ -13,7 +13,9 @@ export default function ProfilePage() {
         occupation: "",
         economicStatus: "standard",
     });
-    const [electionName, setElectionName] = useState("");
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         // Load stored profile if available
@@ -22,6 +24,31 @@ export default function ProfilePage() {
             setFormData(JSON.parse(storedProfile));
         }
     }, []);
+
+    const fetchSuggestions = async (query: string) => {
+        if (!query || query.length < 2) {
+            setSuggestions([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            // 国土地理院の住所検索API
+            const response = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            // 重複を排除して正確な住所文字列を抽出
+            const results = data
+                .map((item: any) => item.properties.title)
+                .filter((value: string, index: number, self: string[]) => self.indexOf(value) === index)
+                .slice(0, 10);
+            setSuggestions(results);
+            setShowSuggestions(results.length > 0);
+        } catch (error) {
+            console.error("Address search error:", error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,50 +60,95 @@ export default function ProfilePage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (name === "residence") {
+            const timer = setTimeout(() => fetchSuggestions(value), 300);
+            return () => clearTimeout(timer);
+        }
+    };
+
+    const handleSelectSuggestion = (suggestion: string) => {
+        setFormData((prev) => ({ ...prev, residence: suggestion }));
+        setShowSuggestions(false);
     };
 
     return (
         <div className="max-w-2xl mx-auto space-y-8 py-8">
             <div className="space-y-2">
-                <h2 className="text-2xl font-bold">プロフィール設定</h2>
+                <h2 className="text-2xl font-bold text-indigo-900 border-b-2 border-indigo-100 pb-2">プロフィール設定</h2>
                 <p className="text-gray-600">
-                    あなたの状況に合わせて、最適な選挙情報とアドバイスを提供します。<br />
-                    入力情報はブラウザに保存され、後で変更も可能です。
+                    あなたの属性に合わせて、最適な選挙情報とアドバイスを提供します。<br />
+                    入力情報はブラウザにのみ保存され、後で変更も可能です。
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">ニックネーム <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-bold text-gray-700">ニックネーム <span className="text-red-500">*</span></label>
                     <input
                         name="nickname"
                         required
                         placeholder="アドバイザー"
-                        className="w-full p-2 border rounded-md"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
                         value={formData.nickname}
                         onChange={handleChange}
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">居住地（市町村まで） <span className="text-red-500">*</span></label>
-                    <input
-                        name="residence"
-                        required
-                        placeholder="例: 東京都新宿区"
-                        className="w-full p-2 border rounded-md"
-                        value={formData.residence}
-                        onChange={handleChange}
-                    />
-                    <p className="text-xs text-gray-500">選挙区の判定に使用します</p>
+                <div className="space-y-2 relative">
+                    <label className="text-sm font-bold text-gray-700">居住地（町名まで） <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                        <input
+                            name="residence"
+                            required
+                            placeholder="例: 西宮市六湛寺町（入力すると候補が出ます）"
+                            autoComplete="off"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                            value={formData.residence}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData(prev => ({ ...prev, residence: val }));
+                                // シンプルなデバウンス代わり
+                                fetchSuggestions(val);
+                            }}
+                            onFocus={() => {
+                                if (suggestions.length > 0) setShowSuggestions(true);
+                            }}
+                            onBlur={() => {
+                                // クリックイベントを拾うために少し遅延させる
+                                setTimeout(() => setShowSuggestions(false), 200);
+                            }}
+                        />
+                        {isSearching && (
+                            <div className="absolute right-3 top-3.5">
+                                <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+                            </div>
+                        )}
+                    </div>
+                    <p className="text-xs text-gray-500">選挙区の正確な判定に使用します。町名まで入力してください。</p>
+
+                    {showSuggestions && suggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                            {suggestions.map((suggestion, index) => (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => handleSelectSuggestion(suggestion)}
+                                    className="w-full text-left p-3 hover:bg-indigo-50 transition-colors border-b border-gray-50 last:border-0 text-sm"
+                                >
+                                    {suggestion}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">年代</label>
+                        <label className="text-sm font-bold text-gray-700">年代</label>
                         <select
                             name="age"
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                             value={formData.age}
                             onChange={handleChange}
                         >
@@ -92,11 +164,11 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">家族構成（任意）</label>
+                        <label className="text-sm font-bold text-gray-700">家族構成（任意）</label>
                         <input
                             name="family"
-                            placeholder="例: 独身、既婚子あり"
-                            className="w-full p-2 border rounded-md"
+                            placeholder="例: 既婚・子供2人、独身など"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                             value={formData.family}
                             onChange={handleChange}
                         />
@@ -105,10 +177,10 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">経済状況（任意）</label>
+                        <label className="text-sm font-bold text-gray-700">経済状況（任意）</label>
                         <select
                             name="economicStatus"
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                             value={formData.economicStatus}
                             onChange={handleChange}
                         >
@@ -121,10 +193,10 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">職業（任意）</label>
+                        <label className="text-sm font-bold text-gray-700">職業（任意）</label>
                         <select
                             name="occupation"
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                             value={(formData as any).occupation || ""}
                             onChange={handleChange}
                         >
@@ -152,12 +224,17 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white p-3 rounded-md font-bold hover:bg-blue-700 transition"
-                >
-                    質問の作成へ進む
-                </button>
+                <div className="pt-4">
+                    <button
+                        type="submit"
+                        className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all shadow-md active:scale-[0.98]"
+                    >
+                        自分に合った選挙を探す
+                    </button>
+                    <p className="text-center text-xs text-gray-400 mt-4 italic">
+                        ※お預かりした属性情報は、アドバイス生成の目的以外には使用されません。
+                    </p>
+                </div>
             </form>
         </div>
     );
