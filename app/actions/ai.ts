@@ -60,7 +60,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
 
         const { text: electionContext } = await generateText({
             // @ts-expect-error - The installed version's types might not support the settings object yet, but runtime should.
-            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
+            model: google("gemini-3-pro-thinking-preview", { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
@@ -82,7 +82,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.0-flash"), // Schema generation works better without grounding sometimes, context is already grounded
+            model: google("gemini-3-pro-thinking-preview"), // Schema generation works better without grounding sometimes, context is already grounded
             schema: questionSchema,
             prompt: prompt,
         });
@@ -144,17 +144,22 @@ export async function findElections(residence: string) {
         const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
         const prompt = `
     現在の日時は ${today} です。
-    あなたは日本の選挙制度に詳しいアシスタントです。
+    あなたは日本の選挙制度により詳しいエキスパートです。
     ユーザーの居住地「${residence}」に関連する、現在行われている、あるいは近い将来（1年以内）予定されている主要な選挙を3〜5件リストアップしてください。
 
-    特に、**既に日程が決まっているもの（公示日・投票日）については、正確な日付**を検索して回答してください。
-    「未定」とする前に、必ず総務省や自治体の選挙管理委員会の最新発表を確認するつもりで回答してください。
+    **【最重要】日付の特定について:**
+    - 今が2026年であれば、**「第51回衆議院議員総選挙」**が実施される可能性が高いです。
+    - 必ず**「第51回衆議院議員総選挙 公示日 投票日」**などで検索を行い、正確な日付（例: 2026年1月28日公示、2月8日投開票など）を特定してください。
+    - すでに公示されている、あるいは日程が報道されている場合、「未定」と答えることは**禁止**です。
+    - 地方選挙についても、自治体の選挙管理委員会サイトにある情報を検索して正確な日付を入れてください。
 
     条件:
-    1. **日付の正確性**: 公示日（告示日）と投票日を可能な限り正確に特定してください。
-    2. その地域で投票権がある可能性が高いもの（都道府県知事選、市区町村長選、議会選、または衆参の国政選挙）。
-    3. もし直近で具体的な選挙がない場合は、「次期衆議院議員総選挙」や、その自治体の「次期首長選挙（任期満了に伴う）」などを挙げてください。
-    4. 過去の選挙は含めないでください。
+    1. **日付の正確性**: 公示日（告示日）と投票日を「YYYY年M月D日」の形式で正確に特定する。
+    2. 対象: その地域で投票権があるもの（国政・都道府県・市区町村）。
+    3. 項目:
+       - name: 正式名称（例: 第51回衆議院議員総選挙、〇〇市長選挙）
+       - officialDate: 公示日/告示日
+       - voteDate: 投票日
     `;
 
         const { object } = await generateObject({

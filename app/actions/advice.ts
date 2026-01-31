@@ -30,7 +30,7 @@ export async function generateVoteAdvice(electionName: string, userProfile: any,
 
         const { text: electionContext } = await generateText({
             // @ts-expect-error - search grounding
-            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
+            model: google("gemini-3-pro-thinking-preview", { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
@@ -91,7 +91,7 @@ export async function generateVoteAdvice(electionName: string, userProfile: any,
     `;
 
         const { text } = await generateText({
-            model: google("gemini-2.0-flash"),
+            model: google("gemini-3-pro-thinking-preview"),
             prompt: prompt,
         });
 
