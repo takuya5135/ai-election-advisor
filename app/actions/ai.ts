@@ -60,7 +60,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
 
         const { text: electionContext } = await generateText({
             // @ts-expect-error - The installed version's types might not support the settings object yet, but runtime should.
-            model: google("gemini-3-pro-thinking-preview", { useSearchGrounding: true }),
+            model: google("gemini-2.0-flash", { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
@@ -74,7 +74,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     タスク:
     上記の方針と**実際の争点**に基づき、**20問**の質問を作成してください。
     一般的な政治観だけでなく、**「${electionName}」で実際に議論されている具体的な政策（例えば${electionContext.slice(0, 20)}...など）**についての賛否を問う質問を必ず含めてください。
-
+    
     各質問には、ユーザーが判断するための材料として、以下の詳細な分析（analysis）を必ず付与してください。
     - メリット・デメリットの公平な分析
     - 政治課題となっている背景
@@ -82,7 +82,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-3-pro-thinking-preview"), // Schema generation works better without grounding sometimes, context is already grounded
+            model: google("gemini-2.0-flash"), // Schema generation using Flash
             schema: questionSchema,
             prompt: prompt,
         });
