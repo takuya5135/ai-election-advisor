@@ -171,6 +171,18 @@ export default function ElectionSearchPage() {
                 </div>
             )}
 
+            {elections.length > 0 && (
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium"
+                    >
+                        <span>🔄</span>
+                        <span>情報を更新（再検索）する</span>
+                    </button>
+                </div>
+            )}
+
             {!isManualMode ? (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                     <p className="text-sm text-gray-500 mb-2">希望の選挙が一覧にありませんか？</p>
