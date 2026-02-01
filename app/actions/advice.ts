@@ -28,7 +28,7 @@ const AdviceSchema = z.object({
     thinkingProcess: z.string().describe("なぜこのような結果になったのか、AIの思考プロセス（Deep Thinking）の要約").optional()
 });
 
-export async function generateAdvice(
+export async function generateVoteAdvice(
     userProfile: any,
     questions: any[],
     answers: any,
