@@ -76,8 +76,10 @@ export default function AdviceGeneratePage() {
                     alert("アドバイス生成に失敗しました。もう一度お試しください。");
                     router.push("/");
                 }
-            } catch (err) {
-                console.error(err);
+            } catch (err: any) {
+                console.error("Error details:", err);
+                alert(`アドバイス生成中にエラーが発生しました。\n\n詳細: ${err.message || JSON.stringify(err)}\n\n(タイムアウトの可能性があります)`);
+                router.push("/");
             }
         };
 

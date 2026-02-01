@@ -5,6 +5,9 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { AI_MODELS } from "@/app/lib/models";
 
+// Allow streaming responses up to 60 seconds
+export const maxDuration = 60;
+
 const AdviceSchema = z.object({
     policyAnalysis: z.object({
         alignment: z.number().min(0).max(100),
