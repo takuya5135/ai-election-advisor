@@ -3,6 +3,7 @@
 import { generateObject, generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
+import { AI_MODELS } from "@/app/lib/models";
 
 // Detailed schema for deep analysis
 const questionSchema = z.object({
@@ -10,7 +11,7 @@ const questionSchema = z.object({
         id: z.string(),
         text: z.string(),
         category: z.string(),
-        questionType: z.enum(["standard", "administration_evaluation"]).default("standard").describe("質問のタイプ"),
+        questionType: z.enum(["standard", "administration_evaluation"]).default("standard").describe("質問のタイプ。政権評価質問は必ず'administration_evaluation'にする。"),
         analysis: z.object({
             merit: z.string().describe("この政策を実行した際のメリット（または政権の功績）"),
             demerit: z.string().describe("この政策を実行した際のデメリット（または政権の罪）"),
@@ -70,7 +71,7 @@ export async function generateElectionQuestions(electionName: string, userProfil
 
         const { text: electionContext } = await generateText({
             // @ts-expect-error - The installed version's types might not support the settings object yet, but runtime should.
-            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
+            model: google(AI_MODELS.FLASH, { useSearchGrounding: true }),
             prompt: researchPrompt,
         });
 
@@ -92,24 +93,36 @@ export async function generateElectionQuestions(electionName: string, userProfil
     - 各分野（世界、自国、社会、経済、福祉、国民生活）への具体的な影響
 
     ${electionLevel === "national" ? `
-    【特別タスク: 部門別政権評価質問】
-    - 以下の5つの部門それぞれについて、現在の政権を総合的に評価することを促す質問（questionType: "administration_evaluation"）を、既存の20問とは別に、あるいはその一部として**必ず合計5問**作成してください。
-    - 各質問のIDはそれぞれ 'admin_econ', 'admin_diplomacy', 'admin_social', 'admin_governance', 'admin_values' としてください。
-    - 各質問のテキストは、ユーザーにその部門での政権の実績・姿勢を5段階で問うものにしてください。
+    【特別タスク: 部門別政権評価質問 (5段階評価)】
+    - 通常の質問に加え、以下の5つの部門それぞれについて、現在の政権を総合的に評価する質問を**必ず**作成してください。
+    - これらの質問は、ユーザーが「1:全く支持しない」〜「5:強く支持する」の5段階で評価するためのものです。
+    - **質問タイプ**: \`questionType\` プロパティを必ず \`"administration_evaluation"\` に設定してください。これ以外は認めません。
+    - **ID**: IDは必ず以下固定で設定してください: 'admin_econ', 'admin_diplomacy', 'admin_social', 'admin_governance', 'admin_values'
+    
+    - **質問文のテンプレート**:
       1. 'admin_econ': 「経済・財政政策（生活実感や物価高対応など）における現政権の実績を、あなたはどの程度評価しますか？」
       2. 'admin_diplomacy': 「外交・安全保障（国際的地位や安全維持など）における現政権の姿勢を、あなたはどの程度評価しますか？」
       3. 'admin_social': 「社会保障・内政（子育て支援や地方創生など）における現政権の取り組みを、あなたはどの程度評価しますか？」
       4. 'admin_governance': 「政治姿勢・統治能力（信頼性や実行力など）における現政権のあり方を、あなたはどの程度評価しますか？」
       5. 'admin_values': 「多様性・人権・価値観（ジェンダーやマイノリティ権利など）における現政権の社会観を、あなたはどの程度評価しますか？」
+
     - 各質問の分析(analysis)には、上述の「現政権の部門別評価」のリサーチ結果に基づき、その部門における具体的な功罪と争点を記載してください。
     ` : ""}
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.5-flash"), // Schema generation using Flash
+            model: google(AI_MODELS.THINKING), // Deep Thinking Mode
             schema: questionSchema,
             prompt: prompt,
         });
+
+        // Deep Thinkingモデルは思考プロセスを含めるため生成が素晴らしいが、
+        // IDが重複する可能性がゼロではないため、重複チェックしてユニークにする（念のため）
+        // 特に admin_ 系が含まれているかチェック
+        const hasAdminInfo = object.questions.some(q => q.questionType === "administration_evaluation");
+        if (electionLevel === "national" && !hasAdminInfo) {
+            console.warn("Administration evaluation questions were likely not generated properly.");
+        }
 
         return { success: true, data: object.questions };
     } catch (error) {
@@ -139,7 +152,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.0-flash"), // Schema generation using Flash
+            model: google(AI_MODELS.THINKING), // Deep Thinking Mode
             schema: questionSchema,
             prompt: prompt,
         });
