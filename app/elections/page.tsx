@@ -78,13 +78,22 @@ export default function ElectionSearchPage() {
 
     if (error) {
         return (
-            <div className="max-w-xl mx-auto py-12 px-4 text-center">
-                <p className="text-red-500 mb-4">{error}</p>
+            <div className="max-w-xl mx-auto py-12 px-4 text-center space-y-6">
+                <div className="p-6 bg-red-50 rounded-xl border border-red-200">
+                    <h3 className="text-lg font-bold text-red-800 mb-2">エラーが発生しました</h3>
+                    <p className="text-red-600 mb-6">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-700 transition shadow-md"
+                    >
+                        🔄 再度検索する
+                    </button>
+                </div>
                 <button
-                    onClick={() => window.location.reload()}
-                    className="underline text-gray-600 hover:text-gray-900"
+                    onClick={() => router.push("/profile")}
+                    className="text-gray-500 hover:text-gray-800 underline text-sm"
                 >
-                    再読み込み
+                    プロフィール（居住地）の設定に戻る
                 </button>
             </div>
         );
@@ -116,34 +125,51 @@ export default function ElectionSearchPage() {
                 </p>
             </div>
 
-            <div className="grid gap-4">
-                {elections.map((election) => (
+            {elections.length === 0 && !loading ? (
+                <div className="text-center py-12 px-6 bg-gray-50 rounded-xl border border-dashed border-gray-300 space-y-4">
+                    <div className="text-4xl">🤔</div>
+                    <h3 className="text-lg font-bold text-gray-800">選挙情報が見つかりませんでした</h3>
+                    <p className="text-gray-600">
+                        一時的なエラーか、現在登録されている選挙情報がない可能性があります。
+                    </p>
                     <button
-                        key={election.id}
-                        onClick={() => handleSelectElection(election)}
-                        className="flex flex-col text-left p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all group"
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg flex items-center justify-center space-x-2 mx-auto"
                     >
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full mb-3 gap-2">
-                            <span className={`inline-block px-2 py-1 text-xs font-bold rounded-md w-fit ${election.level === "national"
-                                ? "bg-purple-100 text-purple-700"
-                                : "bg-green-100 text-green-700"
-                                }`}>
-                                {election.level === "national" ? "国政選挙" : "地方選挙"}
-                            </span>
-                            <div className="text-sm text-gray-500 font-medium text-right flex flex-col items-start md:items-end">
-                                <span>公示: <span className="text-gray-900">{election.officialDate}</span></span>
-                                <span>投開票: <span className="text-red-600 font-bold">{election.voteDate}</span></span>
-                            </div>
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-700 mb-2">
-                            {election.name}
-                        </h3>
-                        <p className="text-gray-600 text-sm">
-                            {election.description}
-                        </p>
+                        <span>🔄</span>
+                        <span>再度検索する</span>
                     </button>
-                ))}
-            </div>
+                </div>
+            ) : (
+                <div className="grid gap-4">
+                    {elections.map((election) => (
+                        <button
+                            key={election.id}
+                            onClick={() => handleSelectElection(election)}
+                            className="flex flex-col text-left p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all group"
+                        >
+                            <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full mb-3 gap-2">
+                                <span className={`inline-block px-2 py-1 text-xs font-bold rounded-md w-fit ${election.level === "national"
+                                    ? "bg-purple-100 text-purple-700"
+                                    : "bg-green-100 text-green-700"
+                                    }`}>
+                                    {election.level === "national" ? "国政選挙" : "地方選挙"}
+                                </span>
+                                <div className="text-sm text-gray-500 font-medium text-right flex flex-col items-start md:items-end">
+                                    <span>公示: <span className="text-gray-900">{election.officialDate}</span></span>
+                                    <span>投開票: <span className="text-red-600 font-bold">{election.voteDate}</span></span>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-700 mb-2">
+                                {election.name}
+                            </h3>
+                            <p className="text-gray-600 text-sm">
+                                {election.description}
+                            </p>
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {!isManualMode ? (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
