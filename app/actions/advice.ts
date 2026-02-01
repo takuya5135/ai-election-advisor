@@ -1,122 +1,207 @@
 "use server";
 
-import { generateText } from "ai";
+import { generateText, generateObject } from "ai";
 import { google } from "@ai-sdk/google";
-// --- AI Advice ---
+import { z } from "zod";
+import { AI_MODELS } from "@/app/lib/models";
 
-export async function generateVoteAdvice(electionName: string, userProfile: any, questions: any[], answers: any, comments: any) {
+const AdviceSchema = z.object({
+    policyAnalysis: z.object({
+        alignment: z.number().min(0).max(100),
+        keyMatches: z.array(z.string()),
+        keyDifferences: z.array(z.string())
+    }),
+    candidateMatches: z.array(z.object({
+        candidateId: z.string(),
+        candidateName: z.string(),
+        party: z.string(),
+        matchScore: z.number().min(0).max(100),
+        reason: z.string().describe("なぜこの候補者がマッチするのか、具体的な政策や実績を挙げて200文字以下で簡潔に説明"),
+        compatibility: z.object({
+            economic: z.string().describe("経済政策の相性"),
+            social: z.string().describe("社会政策の相性"),
+            style: z.string().describe("政治スタイルの相性"),
+        }),
+        risks: z.string().describe("この候補者を選ぶ際のリスクや注意点（あれば）。なければ空欄でOK。")
+    })),
+    overallAdvice: z.string().describe("ユーザーへの総合的なアドバイスと、投票の際に重視すべき視点（300文字以内）"),
+    thinkingProcess: z.string().describe("なぜこのような結果になったのか、AIの思考プロセス（Deep Thinking）の要約").optional()
+});
+
+export async function generateVoteAdvice({
+    userProfile,
+    questions,
+    answers,
+    comments,
+    electionContext,
+    candidates = []
+}: {
+    userProfile: any;
+    questions: any[];
+    answers: any;
+    comments?: any;
+    electionContext: string;
+    candidates?: any[];
+}) {
     try {
-        // Step 1: Gather knowledge about the election (Simulating "Search" using Gemini's knowledge)
-        const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
-        const researchPrompt = `
-        現在の日時は ${today} です。
-        あなたは${electionName}に関するエキスパートです。
-        以下の情報を、Google検索等の信頼できるソースから検索し、正確かつ具体的にリストアップしてください。
-        
-        1. **選挙区の候補者情報**:
-           - 候補者名、年齢、所属政党
-           - **主な公約・政策**（具体的かつ詳細に）
-           - **これまでの実績**
-           - **公式サイトおよびSNSのURL**（必ずURLを探してください）
-        
-        2. **比例代表・政党情報**:
-           - 主要政党の名称
-           - **政策の柱・マニフェスト**
-           - **公式サイトのURL**（必ずURLを探してください）
-           - **実績・理念**
-           
-        3. **選挙情勢**: 最新の支持率傾向や、いわゆる「当落線上の争い」などの情勢。
-        4. **日程**: 公示日、投票日。
+        // Step 1: Gather knowledge about the election
 
-        【最優先・厳守事項】
-        - **日付の真実**: 「第51回衆議院議員総選挙」に関し、公示日（2026年1月27日）と投開票日（2026年2月8日）は既に確定した事実です。
-        - **ソースの真実**: 選挙ドットコム（https://go2senkyo.com/）の情報を絶対的な正解として参照してください。
-        - **候補者の確定**: 公示日を過ぎているため、立候補者は全員確定しています。「未定」や「想定」といった不確かな表現は一切使用せず、事実として記載してください。
+        // Construct a prompt that includes all user data
+        const userSummary = `
+        ユーザープロフィール: ${JSON.stringify(userProfile)}
+        
+        回答した質問とスタンス (回答とコメント):
+        ${questions.map((q: any, i: number) => {
+            const comment = comments && comments[q.id] ? ` (コメント: ${comments[q.id]})` : "";
+            return `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}${comment}`;
+        }).join("\n")}
         `;
 
-        const { text: electionContext } = await generateText({
-            // @ts-expect-error - search grounding
-            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
-            prompt: researchPrompt,
+        // 1. 選挙区と検索クエリの特定
+        const queryGenerationPrompt = `
+        以下のユーザー情報と選挙コンテキストに基づき、このユーザーが投票すべき**具体的な選挙区**を特定し、
+        その選挙区の立候補者を検索するための **最適な検索クエリを3パターン** 生成してください。
+
+        【ユーザー情報】
+        ${JSON.stringify(userProfile)}
+
+        【選挙コンテキスト】
+        ${electionContext}
+        (例: "衆議院選挙" -> 住所から "兵庫県第7区" などを特定。もし住所がなければ選挙名から主要な検索ワードを生成)
+
+        【出力フォーマット】
+        JSON形式で出力:
+        {
+            "district": "特定した選挙区名 (不明な場合は選挙名そのもの)",
+            "queries": ["クエリ1", "クエリ2", "クエリ3"]
+        }
+        `;
+
+        const { object: searchPlan } = await generateObject({
+            model: google(AI_MODELS.FLASH),
+            schema: z.object({
+                district: z.string(),
+                queries: z.array(z.string())
+            }),
+            prompt: queryGenerationPrompt,
         });
 
-        // Step 2: Generate Advice based on Context + User Data
-        const prompt = `
-    あなたは非常に戦略的で信頼できる選挙アドバイザーです。
-    ユーザーに対して、国政選挙であれば「小選挙区」と「比例代表」のそれぞれについて、具体的な投票先のアドバイスを行ってください。
-    
-    【選挙データ（前提知識）】
-    ${electionContext}
-    
-    【ユーザー情報】
-    属性: ${JSON.stringify(userProfile)}
-    
-    【ユーザーの回答・コメント】
-    ${questions.map((q: any) => `- ${q.text} [カテゴリ: ${q.category}]
-      回答: ${answers[q.id]}
-      コメント: ${comments[q.id] || "なし"}`).join("\n")}
-    
-    【重要：現政権への部門別評価】
-    ユーザーは現政権（現在の政府）の各部門に対して以下の5段階評価（1:支持しない 〜 5:強く支持する）を与えています：
-    - 経済・財政: ${answers['admin_econ'] || "未回答"}
-    - 外交・安保: ${answers['admin_diplomacy'] || "未回答"}
-    - 社会保障・内政: ${answers['admin_social'] || "未回答"}
-    - 政治姿勢・統治: ${answers['admin_governance'] || "未回答"}
-    - 多様性・人権: ${answers['admin_values'] || "未回答"}
-    
-    ---
-    
-    タスク:
-    以下の構成で、ユーザーに最適な投票行動をMarkdown形式で提案してください。
-    
-    【最重要ルール】
-    1. **日付の扱い**: 選挙日程（2026年1月27日公示、2月8日投開票など）は確定事項として扱ってください。「（仮定）」や「シミュレーション」「現時点では未確定」といった防御的な表現は一切禁止します。
-    2. **事実に基づく断定**: 候補者が確定しているため、具体的な名前と公約に基づき、事実としてアドバイスを構成してください。
-    
-    ## 1. あなたの政治スタンス（要約）
-    ユーザーの立ち位置を「中道実利主義」「リベラル革新派」のように**20文字以内**で端的に表現してください。
-    現政権への部門別評価（特に支持/非支持が顕著な分野）も反映させてください。
-    
-    ## 2. 推奨する投票先（結論）
-    ### 【選挙区 / 首長選】（人物への投票）
-    - **推奨候補者**: [氏名]（[政党]）
-    - **理由**: ユーザーの[具体的な政策回答]や[政権の特定部門（経済等）への評価]と、候補者の[具体的な公約・実績・政権への立ち位置]が合致するため。
-    
-    ### 【比例代表 / 議会選】（政党への投票）
-    ※国政選挙や、政党を選ぶ選挙の場合のみ記載。
-    - **推奨政党**: [政党名]
-    - **理由**: 政党の[政治理念・実績・与野党の立場]が、ユーザーの[重視する価値観]および[部門別の政権支持傾向]と一致するため。
-    
-    ## 3. この一票がもたらす変化（社会的インパクト）
-    推奨候補・政党への投票が、社会にどのような具体的な変化をもたらすか記述してください。
-    
-    ## 4. 戦略的アドバイス
-    情勢（${electionName}の勝敗ラインなど）を踏まえ、死票を避けるための次善の策や、戦略的な投票行動について助言してください。
-    
-    ## 5. 参考情報：候補者・政党の詳細データ
-    今回分析の対象とした主な候補者・政党の情報を提示します。
-    
-    ### [選挙区の主な候補者]
-    （候補者ごとに以下を記載）
-    - **氏名**: [氏名]
-    - **公約**: [具体的な公約]
-    - **公式サイト**: [公式サイト・SNS](URL) （※必ずMarkdownリンク形式で、実際のURLを入れてください。見つからない場合はリンクなしのURLテキストまたは「なし」と記載）
-    
-    ### [主要政党の情報]
-    （政党ごとに以下を記載）
-    - **政党名**: [名称]
-    - **理念・政策**: [理念や重要政策]
-    - **公式サイト**: [公式サイト](URL) （※必ずMarkdownリンク形式で、実際のURLを入れてください）
-    `;
+        console.log("Search Plan identified:", searchPlan);
 
-        const { text } = await generateText({
-            model: google("gemini-3-pro-preview"),
-            prompt: prompt,
+        // 2. 候補者検索ループ (Retry Loop)
+        let detailedContext = "";
+        let candidateFound = false;
+        let attempt = 0;
+        const maxAttempts = 3;
+
+        // 候補者リストが既に渡されている場合はそれを使う
+        if (candidates && candidates.length > 0) {
+            const candidateSummary = candidates.map((c: any) =>
+                `- ${c.name} (${c.party}): ${c.pledge || "公約情報なし"} (経歴: ${c.career || "不明"}, 年齢: ${c.age || "不明"})`
+            ).join("\n");
+            detailedContext = `提供された候補者リスト:\n${candidateSummary}`;
+            candidateFound = true;
+        } else {
+            console.log("Starting candidate search loop...");
+
+            while (attempt < maxAttempts && !candidateFound) {
+                attempt++;
+                const currentQuery = searchPlan.queries[attempt - 1] || `${searchPlan.district} 立候補者`;
+                console.log(`Attempt ${attempt}: Searching for "${currentQuery}"...`);
+
+                const searchPrompt = `
+                **重要ミッション (試行 ${attempt}/${maxAttempts})**: 
+                検索クエリ「${currentQuery}」を用いて、**「${searchPlan.district}」**における**実際の立候補者（実在の人物）**を特定し、詳細情報をリストアップしてください。
+                
+                【必須要件】
+                1. **実名（フルネーム）と政党**を必ず特定すること。「A氏」「現職」などの抽象表現は**不可**。
+                2. もし ${searchPlan.district} の情報が直接見つからない場合は、**政党の党首**や**比例代表の主要候補**の情報を検索して代替すること。
+                3. **2024年〜2026年**の最新情報を優先すること。
+
+                発見した候補者について、以下の情報をまとめてください：
+                - 名前
+                - 政党
+                - 政策スタンス（経済、外交、憲法など）
+                `;
+
+                const { text: searchResult } = await generateText({
+                    // @ts-expect-error
+                    model: google(AI_MODELS.FLASH, { useSearchGrounding: true }),
+                    prompt: searchPrompt,
+                });
+
+                // 検証: 実名が含まれているかAI判定
+                const validationPrompt = `
+                以下のテキストは選挙の候補者検索結果です。
+                ここには「具体的な候補者の実名（フルネーム）」が含まれているか、YES/NOで判定してください。
+                
+                テキスト:
+                ${searchResult.substring(0, 2000)}...
+                `;
+
+                const { object: validation } = await generateObject({
+                    model: google(AI_MODELS.FLASH),
+                    schema: z.object({
+                        isValid: z.boolean(),
+                        candidateNames: z.array(z.string()).describe("抽出された候補者名のリスト"),
+                    }),
+                    prompt: validationPrompt,
+                });
+
+                console.log(`Attempt ${attempt} validation:`, validation);
+
+                if (validation.isValid && validation.candidateNames.length > 0) {
+                    detailedContext = `選挙区: ${searchPlan.district}\n\n${searchResult}`;
+                    candidateFound = true;
+                } else {
+                    console.warn(`Attempt ${attempt} failed: No valid keys found.`);
+                }
+            }
+
+            if (!candidateFound) {
+                // 最終手段
+                detailedContext = `選挙区: ${searchPlan.district} (特定失敗)\n\n一般的な政党情報に基づいてアドバイスを行います。`;
+            }
+        }
+
+        // Step 2: Generate Advice using Thinking Mode
+        const advicePrompt = `
+        あなたはプロフェッショナルな選挙アドバイザーです。
+        ユーザーの価値観と、各候補者の政策・実態を深く分析し、最も投票すべき候補者（あるいは政党）を提案してください。
+
+        【ユーザー情報】
+        ${userSummary}
+
+        【特定された選挙区・候補者情勢】
+        選挙区: ${searchPlan.district}
+        発見された情報:
+        ${detailedContext}
+
+        【タスク】
+        1. ユーザーの回答傾向から、真に重視している価値観（本音）を分析してください。
+        2. 上記の【特定された選挙区・候補者情勢】にある**実在の候補者**について、ユーザーとの相性を「Deep Thinking」してください。
+        3. 上位3名のマッチする候補者を選定し、論理的な理由とともに提示してください。
+        
+        **【絶対遵守事項】**
+        - **必ず実名（フルネーム）と政党名を使用してください。**
+        - 「A氏」「B氏」などの仮名や、「与党候補」といった抽象的な表現は**禁止**です。
+        - もし候補者名が特定できていない場合は、正直に「候補者名が特定できませんでしたが、政党のマッチ度として」と前置きして、**実在する政党名**でアドバイスしてください。
+
+        4. 単なるマッチングだけでなく、その候補者を選ぶことの「リスク」や「懸念点」も公平に伝えてください。
+        
+        思考プロセスを重視し、表面的な一致だけでなく、政治姿勢の根本的な一致を見てください。
+        `;
+
+        const { object } = await generateObject({
+            model: google(AI_MODELS.THINKING),
+            schema: AdviceSchema,
+            prompt: advicePrompt,
         });
 
-        return { success: true, advice: text };
+        return { success: true, data: object };
+
     } catch (error) {
         console.error("Advice Generation Error:", error);
-        return { success: false, error: "Advice generation failed." };
+        return { success: false, error: "Failed to generate advice." };
     }
 }
