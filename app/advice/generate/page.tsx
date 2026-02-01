@@ -81,7 +81,17 @@ export default function AdviceGeneratePage() {
                 }
             } catch (err: any) {
                 console.error("Error details:", err);
-                alert(`アドバイス生成中にエラーが発生しました。\n\n詳細: ${err.message || JSON.stringify(err)}\n\n(タイムアウトの可能性があります)`);
+
+                // 詳細なエラー情報を収集
+                const errorInfo = {
+                    message: err.message || "Unknown error",
+                    name: err.name,
+                    stack: err.stack,
+                    digest: err.digest, // Next.js特有のエラーID
+                    raw: JSON.stringify(err, Object.getOwnPropertyNames(err))
+                };
+
+                alert(`アドバイス生成中にエラーが発生しました。\n\n【エラー詳細】\n${errorInfo.message}\n\n【トラブルシューティング用情報】\n${JSON.stringify(errorInfo, null, 2)}`);
                 router.push("/");
             }
         };
