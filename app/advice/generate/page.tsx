@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { generateVoteAdvice } from "@/app/actions/advice";
 
-// Allow execution up to 60 seconds (Vercel Serverless Function limit check)
+// Allow execution up to 60 seconds (Client-side trigger safeguard, though enforced on API)
 export const maxDuration = 60;
 
 export default function AdviceGeneratePage() {
@@ -25,14 +24,27 @@ export default function AdviceGeneratePage() {
             }
 
             try {
-                const result = await generateVoteAdvice({
-                    electionContext: electionStr,
-                    userProfile: JSON.parse(profileStr),
-                    questions: JSON.parse(questionsStr),
-                    answers: JSON.parse(answersStr),
-                    comments: JSON.parse(commentsStr),
-                    candidates: [] // 候補者データは現在LocalStorageに保存されていないため空配列。検索で補完させる。
+                // Call via Route Handler to support maxDuration configuration
+                const response = await fetch("/api/advice", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        electionContext: electionStr,
+                        userProfile: JSON.parse(profileStr),
+                        questions: JSON.parse(questionsStr),
+                        answers: JSON.parse(answersStr),
+                        comments: JSON.parse(commentsStr),
+                        candidates: []
+                    }),
                 });
+
+                if (!response.ok) {
+                    throw new Error(`API returned status: ${response.status}`);
+                }
+
+                const result = await response.json();
 
                 if (result.success && result.data) {
                     const data = result.data;

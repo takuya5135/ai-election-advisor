@@ -1,4 +1,4 @@
-"use server";
+
 
 import { generateText, generateObject } from "ai";
 import { google } from "@ai-sdk/google";
