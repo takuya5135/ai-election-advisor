@@ -5,6 +5,9 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { AI_MODELS } from "@/app/lib/models";
 
+// Allow execution up to 60 seconds (Vercel Pro/Hobby limit)
+export const maxDuration = 60;
+
 const AdviceSchema = z.object({
     policyAnalysis: z.object({
         alignment: z.number().min(0).max(100),
