@@ -88,11 +88,11 @@ export async function generateVoteAdvice({
 
         console.log("Search Plan identified:", searchPlan);
 
-        // 2. 候補者検索ループ (Retry Loop)
+        // 2. 候補者検索ループ (Retry Loop) - 最適化: 最大2回、検証APIコールなし
         let detailedContext = "";
         let candidateFound = false;
         let attempt = 0;
-        const maxAttempts = 3;
+        const maxAttempts = 2; // タイムアウトを防ぐため最大2回に制限
 
         // 候補者リストが既に渡されている場合はそれを使う
         if (candidates && candidates.length > 0) {
@@ -115,7 +115,7 @@ export async function generateVoteAdvice({
                 
                 【必須要件】
                 1. **実名（フルネーム）と政党**を必ず特定すること。「A氏」「現職」などの抽象表現は**不可**。
-                2. もし ${searchPlan.district} の情報が直接見つからない場合は、**政党の党首**や**比例代表の主要候補**の情報を検索して代替すること。
+                2. もし ${searchPlan.district} の具体的な候補者名が見つからない場合は、**「NO_CANDIDATES_FOUND」**とだけ出力してください。
                 3. **2024年〜2026年**の最新情報を優先すること。
 
                 発見した候補者について、以下の情報をまとめてください：
@@ -130,31 +130,17 @@ export async function generateVoteAdvice({
                     prompt: searchPrompt,
                 });
 
-                // 検証: 実名が含まれているかAI判定
-                const validationPrompt = `
-                以下のテキストは選挙の候補者検索結果です。
-                ここには「具体的な候補者の実名（フルネーム）」が含まれているか、YES/NOで判定してください。
-                
-                テキスト:
-                ${searchResult.substring(0, 2000)}...
-                `;
+                // テキスト解析による簡易検証（APIコール節約）
+                const isNotFound = searchResult.includes("NO_CANDIDATES_FOUND");
+                const hasNames = searchResult.length > 50 && !isNotFound;
 
-                const { object: validation } = await generateObject({
-                    model: google(AI_MODELS.FLASH),
-                    schema: z.object({
-                        isValid: z.boolean(),
-                        candidateNames: z.array(z.string()).describe("抽出された候補者名のリスト"),
-                    }),
-                    prompt: validationPrompt,
-                });
+                console.log(`Attempt ${attempt} result length: ${searchResult.length}, Found: ${hasNames}`);
 
-                console.log(`Attempt ${attempt} validation:`, validation);
-
-                if (validation.isValid && validation.candidateNames.length > 0) {
+                if (hasNames) {
                     detailedContext = `選挙区: ${searchPlan.district}\n\n${searchResult}`;
                     candidateFound = true;
                 } else {
-                    console.warn(`Attempt ${attempt} failed: No valid keys found.`);
+                    console.warn(`Attempt ${attempt} failed: Candidates not found.`);
                 }
             }
 
