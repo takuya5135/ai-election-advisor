@@ -202,7 +202,7 @@ export async function findElections(residence: string) {
 
         const { text: nationalResearch } = await generateText({
             // @ts-expect-error - search grounding
-            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
+            model: google(AI_MODELS.FLASH, { useSearchGrounding: true }),
             prompt: nationalPrompt,
         });
 
@@ -222,7 +222,7 @@ export async function findElections(residence: string) {
 
         const { text: localResearch } = await generateText({
             // @ts-expect-error - search grounding
-            model: google("gemini-2.5-flash", { useSearchGrounding: true }),
+            model: google(AI_MODELS.FLASH, { useSearchGrounding: true }),
             prompt: localPrompt,
         });
 
@@ -244,7 +244,7 @@ export async function findElections(residence: string) {
     `;
 
         const { object } = await generateObject({
-            model: google("gemini-2.5-flash"),
+            model: google(AI_MODELS.FLASH),
             schema: electionSchema,
             prompt: finalPrompt,
         });
