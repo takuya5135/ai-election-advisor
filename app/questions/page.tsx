@@ -116,13 +116,14 @@ export default function QuestionsPage() {
         return (
             <div className="max-w-xl mx-auto py-12 px-4 space-y-8 text-center animate-in fade-in">
                 <h2 className="text-3xl font-bold text-gray-800">回答ありがとうございます</h2>
-                {Object.values(answers).filter(a => a === "unknown").length > 3 ? (
+                {Object.values(answers).filter(a => a === "unknown" || a === "neutral").length >= 5 ? (
                     <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-left space-y-3">
                         <p className="font-bold text-yellow-800 flex items-center">
                             <span className="mr-2 text-xl">💡</span> より詳しくあなたの考えを知るために
                         </p>
                         <p className="text-sm text-yellow-700 leading-relaxed">
-                            「わからない・関心ない」という回答がいくつかありました。よりあなたにぴったりの候補者を見つけるために、別の角度からの質問を追加で作成することをお勧めします。
+                            「わからない」「どちらでもない」といった回答がいくつかありました。<br />
+                            よりあなたにぴったりの候補者を見つけるために、政策の細かな是非ではなく、<strong>「大きな政府か小さな政府か」「現政権の雰囲気が好きか嫌いか」</strong>といった、より答えやすい根本的な価値観を問う質問を追加で作成することをお勧めします。
                         </p>
                     </div>
                 ) : (
