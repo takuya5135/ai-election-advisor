@@ -5,9 +5,6 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { AI_MODELS } from "@/app/lib/models";
 
-// Allow streaming responses up to 60 seconds
-export const maxDuration = 60;
-
 const AdviceSchema = z.object({
     policyAnalysis: z.object({
         alignment: z.number().min(0).max(100),
@@ -48,10 +45,10 @@ export async function generateVoteAdvice(
         ユーザープロフィール: ${JSON.stringify(userProfile)}
         
         回答した質問とスタンス:
-        ${questions.map((q, i) => `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}`).join("\n")}
+        ${questions.map((q: any, i: number) => `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}`).join("\n")}
         `;
 
-        const candidateSummary = candidates.map(c =>
+        const candidateSummary = candidates.map((c: any) =>
             `- ${c.name} (${c.party}): ${c.pledge || "公約情報なし"} (経歴: ${c.career || "不明"}, 年齢: ${c.age || "不明"})`
         ).join("\n");
 
@@ -107,3 +104,6 @@ export async function generateVoteAdvice(
         return { success: false, error: "Failed to generate advice." };
     }
 }
+
+// Allow streaming responses up to 60 seconds
+export const maxDuration = 60;
