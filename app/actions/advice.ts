@@ -99,8 +99,12 @@ export async function generateVoteAdvice(
 
         return { success: true, data: object };
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Advice Generation Error:", error);
-        return { success: false, error: "Failed to generate advice." };
+        return {
+            success: false,
+            error: error.message || "Failed to generate advice.",
+            details: JSON.stringify(error, Object.getOwnPropertyNames(error))
+        };
     }
 }

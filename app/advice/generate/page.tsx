@@ -76,7 +76,9 @@ export default function AdviceGeneratePage() {
                     router.push("/advice");
                 } else {
                     console.error("Advice generation failed:", result);
-                    alert("アドバイス生成に失敗しました。もう一度お試しください。");
+                    const errorMsg = result.error || "Unknown error";
+                    const errorDetails = result.details || JSON.stringify(result);
+                    alert(`アドバイス生成に失敗しました（サーバーエラー）。\n\n【エラーメッセージ】\n${errorMsg}\n\n【技術的詳細】\n${errorDetails}`);
                     router.push("/");
                 }
             } catch (err: any) {
