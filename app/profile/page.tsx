@@ -146,21 +146,16 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-700">年代</label>
-                        <select
+                        <input
+                            type="number"
                             name="age"
-                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                            required
+                            min="18"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
+                            placeholder="例: 25"
                             value={formData.age}
                             onChange={handleChange}
-                        >
-                            <option value="">選択してください</option>
-                            <option value="10s">10代</option>
-                            <option value="20s">20代</option>
-                            <option value="30s">30代</option>
-                            <option value="40s">40代</option>
-                            <option value="50s">50代</option>
-                            <option value="60s">60代</option>
-                            <option value="70s">70代以上</option>
-                        </select>
+                        />
                     </div>
 
                     <div className="space-y-2">
