@@ -5,8 +5,6 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { AI_MODELS } from "@/app/lib/models";
 
-
-
 const AdviceSchema = z.object({
     policyAnalysis: z.object({
         alignment: z.number().min(0).max(100),

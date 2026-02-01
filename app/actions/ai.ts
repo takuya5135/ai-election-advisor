@@ -5,8 +5,6 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { AI_MODELS } from "@/app/lib/models";
 
-
-
 // Detailed schema for deep analysis
 const questionSchema = z.object({
     questions: z.array(z.object({
@@ -257,6 +255,3 @@ export async function findElections(residence: string) {
         return { success: false, error: "Election Search Failed" };
     }
 }
-
-// Allow streaming responses up to 60 seconds
-export const maxDuration = 60;
