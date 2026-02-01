@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { generateVoteAdvice } from "@/app/actions/advice";
 
+// Allow execution up to 60 seconds (Vercel Serverless Function limit check)
+export const maxDuration = 60;
+
 export default function AdviceGeneratePage() {
     const router = useRouter();
     const [status, setStatus] = useState("回答を分析中...");

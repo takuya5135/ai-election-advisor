@@ -1,48 +1,31 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export const dynamic = 'force-dynamic';
-
-export async function GET() {
-    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams;
+    const queryKey = searchParams.get("key");
+    const apiKey = queryKey || process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_API_KEY;
 
     if (!apiKey) {
-        return NextResponse.json({
-            error: "API Key is missing",
-            envCheck: {
-                GOOGLE_GENERATIVE_AI_API_KEY: !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
-            }
-        }, { status: 500 });
+        return NextResponse.json({ error: "API Key not found. Please set env var or pass ?key=YOUR_KEY" }, { status: 400 });
     }
 
     try {
-        // Google Generative AI APIのmodels.listエンドポイントを叩く
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            return NextResponse.json({
-                error: "Failed to fetch models from Google API",
-                status: response.status,
-                details: errorText
-            }, { status: response.status });
-        }
-
         const data = await response.json();
 
-        // 見やすいように少し加工して返す
-        const models = data.models?.map((m: any) => ({
-            name: m.name,
-            displayName: m.displayName,
-            description: m.description,
-            supportedGenerationMethods: m.supportedGenerationMethods
-        })) || [];
+        // 思考モデル（Thinking）を含んでいるか確認しやすいように整形
+        const models = data.models || [];
+        const thinkingModels = models.filter((m: any) =>
+            m.name.includes("thinking") || m.name.includes("preview") || m.name.includes("exp")
+        );
 
         return NextResponse.json({
             count: models.length,
-            models
+            thinking_related: thinkingModels.map((m: any) => m.name),
+            all_models: models.map((m: any) => m.name),
+            raw_data: data
         });
-
-    } catch (error) {
-        return NextResponse.json({ error: String(error) }, { status: 500 });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
