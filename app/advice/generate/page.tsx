@@ -25,13 +25,14 @@ export default function AdviceGeneratePage() {
             }
 
             try {
-                const result = await generateVoteAdvice(
-                    electionStr,
-                    JSON.parse(profileStr),
-                    JSON.parse(questionsStr),
-                    JSON.parse(answersStr),
-                    JSON.parse(commentsStr)
-                );
+                const result = await generateVoteAdvice({
+                    electionContext: electionStr,
+                    userProfile: JSON.parse(profileStr),
+                    questions: JSON.parse(questionsStr),
+                    answers: JSON.parse(answersStr),
+                    comments: JSON.parse(commentsStr),
+                    candidates: [] // 候補者データは現在LocalStorageに保存されていないため空配列。検索で補完させる。
+                });
 
                 if (result.success && result.data) {
                     const data = result.data;
@@ -76,9 +77,7 @@ export default function AdviceGeneratePage() {
                     router.push("/advice");
                 } else {
                     console.error("Advice generation failed:", result);
-                    const errorMsg = result.error || "Unknown error";
-                    const errorDetails = result.details || JSON.stringify(result);
-                    alert(`アドバイス生成に失敗しました（サーバーエラー）。\n\n【エラーメッセージ】\n${errorMsg}\n\n【技術的詳細】\n${errorDetails}`);
+                    alert("アドバイス生成に失敗しました。もう一度お試しください。");
                     router.push("/");
                 }
             } catch (err: any) {

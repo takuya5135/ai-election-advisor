@@ -28,33 +28,42 @@ const AdviceSchema = z.object({
     thinkingProcess: z.string().describe("なぜこのような結果になったのか、AIの思考プロセス（Deep Thinking）の要約").optional()
 });
 
-export async function generateVoteAdvice(
-    userProfile: any,
-    questions: any[],
-    answers: any,
-    electionContext: string,
-    candidates: any[]
-) {
+export async function generateVoteAdvice({
+    userProfile,
+    questions,
+    answers,
+    comments,
+    electionContext,
+    candidates = []
+}: {
+    userProfile: any;
+    questions: any[];
+    answers: any;
+    comments?: any;
+    electionContext: string;
+    candidates?: any[];
+}) {
     try {
-        // Step 1: Gather knowledge about the election (Simulating "Search" using Gemini's knowledge)
-        // In a real scenario, this might involve fetching data from external APIs or a vector database.
-        // For now, we rely on the model's updated knowledge cutoff and grounding (if enabled).
+        // Step 1: Gather knowledge about the election
 
         // Construct a prompt that includes all user data
         const userSummary = `
         ユーザープロフィール: ${JSON.stringify(userProfile)}
         
-        回答した質問とスタンス:
-        ${questions.map((q: any, i: number) => `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}`).join("\n")}
+        回答した質問とスタンス (回答とコメント):
+        ${questions.map((q: any, i: number) => {
+            const comment = comments && comments[q.id] ? ` (コメント: ${comments[q.id]})` : "";
+            return `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}${comment}`;
+        }).join("\n")}
         `;
 
-        const candidateSummary = candidates.map((c: any) =>
-            `- ${c.name} (${c.party}): ${c.pledge || "公約情報なし"} (経歴: ${c.career || "不明"}, 年齢: ${c.age || "不明"})`
-        ).join("\n");
+        const candidateSummary = candidates && candidates.length > 0
+            ? candidates.map((c: any) =>
+                `- ${c.name} (${c.party}): ${c.pledge || "公約情報なし"} (経歴: ${c.career || "不明"}, 年齢: ${c.age || "不明"})`
+            ).join("\n")
+            : "候補者情報が直接提供されていません。検索フェーズで補完してください。";
 
-        // Use standard Flash model for initial context understanding if needed, 
-        // but for advice we want the best reasoning.
-        // Let's do a preliminary search/context refinement.
+        // Use standard Flash model for initial context understanding
         const searchPrompt = `
         以下の選挙と候補者に関する最新の情勢、および各候補者の詳細な政策スタンス（特に経済、憲法、エネルギー、社会保障）を検索して整理してください。
         
@@ -99,12 +108,8 @@ export async function generateVoteAdvice(
 
         return { success: true, data: object };
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Advice Generation Error:", error);
-        return {
-            success: false,
-            error: error.message || "Failed to generate advice.",
-            details: JSON.stringify(error, Object.getOwnPropertyNames(error))
-        };
+        return { success: false, error: "Failed to generate advice." };
     }
 }
