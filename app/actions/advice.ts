@@ -37,52 +37,70 @@ export async function generateAdvice(
 ) {
     try {
         // Step 1: Gather knowledge about the election (Simulating "Search" using Gemini's knowledge)
-        2. ** 事実に基づく断定 **: 候補者が確定しているため、具体的な名前と公約に基づき、事実としてアドバイスを構成してください。
-    
-    ## 1. あなたの政治スタンス（要約）
-        ユーザーの立ち位置を「中道実利主義」「リベラル革新派」のように ** 20文字以内 ** で端的に表現してください。
-        現政権への部門別評価（特に支持 / 非支持が顕著な分野）も反映させてください。
-    
-    ## 2. 推奨する投票先（結論）
-    ### 【選挙区 / 首長選】（人物への投票）
-    - ** 推奨候補者 **: [氏名]（[政党]）
-    - ** 理由 **: ユーザーの[具体的な政策回答]や[政権の特定部門（経済等）への評価]と、候補者の[具体的な公約・実績・政権への立ち位置]が合致するため。
-    
-    ### 【比例代表 / 議会選】（政党への投票）
-    ※国政選挙や、政党を選ぶ選挙の場合のみ記載。
-    - ** 推奨政党 **: [政党名]
-            - ** 理由 **: 政党の[政治理念・実績・与野党の立場]が、ユーザーの[重視する価値観]および[部門別の政権支持傾向]と一致するため。
-    
-    ## 3. この一票がもたらす変化（社会的インパクト）
-        推奨候補・政党への投票が、社会にどのような具体的な変化をもたらすか記述してください。
-    
-    ## 4. 戦略的アドバイス
-        情勢（${ electionName } の勝敗ラインなど）を踏まえ、死票を避けるための次善の策や、戦略的な投票行動について助言してください。
-    
-    ## 5. 参考情報：候補者・政党の詳細データ
-        今回分析の対象とした主な候補者・政党の情報を提示します。
-    
-    ###[選挙区の主な候補者]
-    （候補者ごとに以下を記載）
-    - ** 氏名 **: [氏名]
-            - ** 公約 **: [具体的な公約]
-                - ** 公式サイト **: [公式サイト・SNS](URL) （※必ずMarkdownリンク形式で、実際のURLを入れてください。見つからない場合はリンクなしのURLテキストまたは「なし」と記載）
-    
-    ###[主要政党の情報]
-    （政党ごとに以下を記載）
-    - ** 政党名 **: [名称]
-            - ** 理念・政策 **: [理念や重要政策]
-                - ** 公式サイト **: [公式サイト](URL) （※必ずMarkdownリンク形式で、実際のURLを入れてください）
+        // In a real scenario, this might involve fetching data from external APIs or a vector database.
+        // For now, we rely on the model's updated knowledge cutoff and grounding (if enabled).
+
+        // Construct a prompt that includes all user data
+        const userSummary = `
+        ユーザープロフィール: ${JSON.stringify(userProfile)}
+        
+        回答した質問とスタンス:
+        ${questions.map((q, i) => `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}`).join("\n")}
         `;
 
-        const { text } = await generateText({
-            model: google("gemini-3-pro-preview"),
-            prompt: prompt,
+        const candidateSummary = candidates.map(c =>
+            `- ${c.name} (${c.party}): ${c.pledge || "公約情報なし"} (経歴: ${c.career || "不明"}, 年齢: ${c.age || "不明"})`
+        ).join("\n");
+
+        // Use standard Flash model for initial context understanding if needed, 
+        // but for advice we want the best reasoning.
+        // Let's do a preliminary search/context refinement.
+        const searchPrompt = `
+        以下の選挙と候補者に関する最新の情勢、および各候補者の詳細な政策スタンス（特に経済、憲法、エネルギー、社会保障）を検索して整理してください。
+        
+        選挙名: ${electionContext}
+        候補者リスト:
+        ${candidateSummary}
+
+        出力は、AIがアドバイスを生成するための「内部資料」として詳細に記述してください。
+        `;
+
+        const { text: detailedContext } = await generateText({
+            // @ts-expect-error
+            model: google(AI_MODELS.FLASH, { useSearchGrounding: true }),
+            prompt: searchPrompt,
         });
 
-        return { success: true, advice: text };
+        // Step 2: Generate Advice using Thinking Mode
+        const advicePrompt = `
+        あなたはプロフェッショナルな選挙アドバイザーです。
+        ユーザーの価値観と、各候補者の政策・実態を深く分析し、最も投票すべき候補者（あるいは政党）を提案してください。
+
+        【ユーザー情報】
+        ${userSummary}
+
+        【選挙・候補者情報の詳細分析（Grounding済み）】
+        ${detailedContext}
+
+        【タスク】
+        1. ユーザーの回答傾向から、真に重視している価値観（本音）を分析してください。
+        2. 各候補者の公約だけでなく、過去の実績や発言、所属政党の動向も含めて、ユーザーとの相性を「Deep Thinking」してください。
+        3. 上位3名のマッチする候補者を選定し、論理的な理由とともに提示してください。
+        4. 単なるマッチングだけでなく、その候補者を選ぶことの「リスク」や「懸念点」も公平に伝えてください。
+        
+        思考プロセスを重視し、表面的な一致だけでなく、政治姿勢の根本的な一致を見てください。
+        `;
+
+        const { object } = await generateObject({
+            model: google(AI_MODELS.THINKING),
+            schema: AdviceSchema,
+            prompt: advicePrompt,
+        });
+
+        return { success: true, data: object };
+
     } catch (error) {
         console.error("Advice Generation Error:", error);
-        return { success: false, error: "Advice generation failed." };
+        return { success: false, error: "Failed to generate advice." };
     }
 }
