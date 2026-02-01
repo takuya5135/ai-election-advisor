@@ -145,13 +145,41 @@ export async function generateVoteAdvice({
             }
 
             if (!candidateFound) {
-                // 最終手段
-                detailedContext = `選挙区: ${searchPlan.district} (特定失敗)\n\n一般的な政党情報に基づいてアドバイスを行います。`;
-            }
-        }
+                // 最終手段: 候補者が見つからない場合は「党首対決」として情報を再取得
+                console.warn("Local candidates not found. Falling back to Party Leader search.");
 
-        // Step 2: Generate Advice using Thinking Mode
-        const advicePrompt = `
+                const leaderSearchPrompt = `
+            **緊急ミッション**: 特定の選挙区の候補者情報が不足しているため、代わりに**主要政党の党首**に関する情報を詳細に検索してください。
+            
+            【検索対象】
+            1. 自由民主党 総裁（石破茂クラスの現職）
+            2. 立憲民主党 代表（野田佳彦クラスの現職）
+            3. 日本維新の会 代表
+            4. 国民民主党 代表
+            5. その他主要政党（公明、共産、れいわ等）の党首
+            
+            【出力要件】
+            - 各党首の**実名（フルネーム）**
+            - 今回の選挙における**主要な主張・スタンス**（経済、安保、裏金問題への対応など）
+            - 最近の発言
+            `;
+
+                const { text: leaderContext } = await generateText({
+                    // @ts-expect-error
+                    model: google(AI_MODELS.FLASH, { useSearchGrounding: true }),
+                    prompt: leaderSearchPrompt,
+                });
+
+                detailedContext = `
+            【注意】指定された選挙区（${searchPlan.district}）の具体的な候補者情報が十分に特定できませんでした。
+            代わりに、各党の**党首（リーダー）**の政策とスタンスに基づいて、政党レベルでのマッチングとアドバイスを行います。
+            
+            ${leaderContext}
+            `;
+            }
+
+            // Step 2: Generate Advice using Thinking Mode
+            const advicePrompt = `
         あなたはプロフェッショナルな選挙アドバイザーです。
         ユーザーの価値観と、各候補者の政策・実態を深く分析し、最も投票すべき候補者（あるいは政党）を提案してください。
 
@@ -178,16 +206,16 @@ export async function generateVoteAdvice({
         思考プロセスを重視し、表面的な一致だけでなく、政治姿勢の根本的な一致を見てください。
         `;
 
-        const { object } = await generateObject({
-            model: google(AI_MODELS.THINKING),
-            schema: AdviceSchema,
-            prompt: advicePrompt,
-        });
+            const { object } = await generateObject({
+                model: google(AI_MODELS.THINKING),
+                schema: AdviceSchema,
+                prompt: advicePrompt,
+            });
 
-        return { success: true, data: object };
+            return { success: true, data: object };
 
-    } catch (error) {
-        console.error("Advice Generation Error:", error);
-        return { success: false, error: "Failed to generate advice." };
+        } catch (error) {
+            console.error("Advice Generation Error:", error);
+            return { success: false, error: "Failed to generate advice." };
+        }
     }
-}
