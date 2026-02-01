@@ -30,11 +30,50 @@ export default function AdviceGeneratePage() {
                     JSON.parse(commentsStr)
                 );
 
-                if (result.success && result.advice) {
-                    localStorage.setItem("ai_advice", result.advice);
+                if (result.success && result.data) {
+                    const data = result.data;
+
+                    // 構造化データをMarkdown形式に変換して保存（既存の表示コンポーネントとの互換性維持のため）
+                    let markdownAdvice = "";
+
+                    // 1. 総合アドバイス
+                    markdownAdvice += `${data.overallAdvice}\n\n`;
+
+                    // 2. 思考プロセス (あれば)
+                    if (data.thinkingProcess) {
+                        markdownAdvice += `### AIの思考プロセス (Deep Thinking)\n${data.thinkingProcess}\n\n`;
+                    }
+
+                    markdownAdvice += `---\n\n`;
+
+                    // 3. 政策一致度分析
+                    markdownAdvice += `### 🔍 政策一致度分析\n`;
+                    markdownAdvice += `- **全体一致度**: ${data.policyAnalysis.alignment}%\n`;
+                    markdownAdvice += `- **主な一致点**: ${data.policyAnalysis.keyMatches.join("、")}\n`;
+                    markdownAdvice += `- **主な相違点**: ${data.policyAnalysis.keyDifferences.join("、")}\n\n`;
+
+                    // 4. 候補者との相性
+                    markdownAdvice += `### 👤 候補者・政党との相性詳細\n\n`;
+                    data.candidateMatches.forEach((c: any) => {
+                        markdownAdvice += `#### ${c.candidateName} (${c.party}) - マッチ度: ${c.matchScore}%\n`;
+                        markdownAdvice += `${c.reason}\n\n`;
+                        markdownAdvice += `- **経済政策**: ${c.compatibility.economic}\n`;
+                        markdownAdvice += `- **社会政策**: ${c.compatibility.social}\n`;
+                        markdownAdvice += `- **政治スタイル**: ${c.compatibility.style}\n`;
+                        if (c.risks) {
+                            markdownAdvice += `- **⚠️ 注意点**: ${c.risks}\n`;
+                        }
+                        markdownAdvice += `\n`;
+                    });
+
+                    localStorage.setItem("ai_advice", markdownAdvice);
+                    // バックアップとして構造化データも保存しておく
+                    localStorage.setItem("ai_advice_json", JSON.stringify(data));
+
                     router.push("/advice");
                 } else {
-                    alert("アドバイス生成に失敗しました。");
+                    console.error("Advice generation failed:", result);
+                    alert("アドバイス生成に失敗しました。もう一度お試しください。");
                     router.push("/");
                 }
             } catch (err) {
