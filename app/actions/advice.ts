@@ -14,11 +14,12 @@ const AdviceSchema = z.object({
         keyDifferences: z.array(z.string())
     }),
     candidateMatches: z.array(z.object({
+        rank: z.number().min(1).max(3).describe("推奨順位 (1位〜3位)"),
         candidateId: z.string(),
         candidateName: z.string(),
         party: z.string(),
         matchScore: z.number().min(0).max(100),
-        reason: z.string().describe("なぜこの候補者がマッチするのか、具体的な政策や実績を挙げて200文字以下で簡潔に説明"),
+        reason: z.string().describe("その順位になった理由。1位は強く推奨する理由、2位・3位は次点としてのメリットや、1位との違いを説明。"),
         compatibility: z.object({
             economic: z.string().describe("経済政策の相性"),
             social: z.string().describe("社会政策の相性"),
@@ -26,10 +27,11 @@ const AdviceSchema = z.object({
         }),
         risks: z.string().describe("この候補者を選ぶ際のリスクや注意点（あれば）。なければ空欄でOK。")
     })),
-    proportionalAdvice: z.object({
-        recommendedParty: z.string().describe("比例代表で投票すべき政党名"),
-        reason: z.string().describe("なぜその政党が推奨されるのか、150文字以内で簡潔に")
-    }),
+    proportionalAdvice: z.array(z.object({
+        rank: z.number().min(1).max(3).describe("推奨順位 (1位〜3位)"),
+        partyName: z.string().describe("比例代表で投票すべき政党名"),
+        reason: z.string().describe("なぜその政党が推奨されるのか、簡潔に")
+    })).min(1).max(3),
     overallAdvice: z.string().describe("小選挙区での投票アドバイスまとめ（最も推奨する候補者を中心に簡潔に）"),
     votingSignificance: z.string().describe("今回の投票が社会に与える影響と、ユーザーへの励まし（モチベーション）のメッセージ。200文字〜300文字程度。"),
     thinkingProcess: z.string().describe("なぜこのような結果になったのか、AIの思考プロセス（Deep Thinking）の要約").optional()
@@ -107,10 +109,8 @@ export async function generateVoteAdvice({
 
         【戦略的投票（Strategic Voting）の考慮】
         今回ユーザーは「死票（Dead Vote）を避けたい」という意図を持っています。
-        - もし、ユーザーと最もポリシーが一致する候補者が「泡沫候補（当選確率が極めて低い）」であり、次点のマッチする候補者が「有力候補（当選を争っている）」である場合、
-        - 「本来はA候補がベストマッチですが、死票を避けて当選を確実にするならB候補も選択肢です」といった、**勝敗を意識した戦略的なアドバイス**を含めてください。
-        - 比例代表においても同様に、議席獲得が見込めない政党よりは、少しでも政策が近く議席獲得可能な政党を勧める視点を持ってください。
-        - ただし、ユーザーの理想を無視して「勝ち馬に乗れ」と言うのではなく、あくまで「理想」と「現実（死票回避）」のバランスを提示してください。
+        - 1位の候補者だけでなく、次点（2位・3位）の候補も含めて提案してください。
+        - 当選確率や「死票回避」の観点も加味してランク付けを行ってください。
 
         【コンテキスト情報（真実）】
         選挙概要: ${electionJson.election_meta.overall_context}
@@ -125,18 +125,16 @@ export async function generateVoteAdvice({
         【タスク】
         以下の構成でアドバイスを作成してください。
 
-        1. **小選挙区（候補者）のアドバイス**:
-           - 最も推奨する候補者を1名（または接戦なら2名）選び、その理由を簡潔に。
-           - ユーザーの重視する政策との合致点を示してください。
+        1. **小選挙区（候補者）のランキング**:
+           - **最も推奨する候補者（1位）から3位まで**を選定してください。
+           - 順位付けの根拠（政策一致度、または死票回避の戦略性）を明確に説明してください。
 
-        2. **比例代表（政党）のアドバイス**:
-           - 候補者個人だけでなく、**政党（比例代表）**としてどこに投票すべきかも提案してください。
+        2. **比例代表（政党）のランキング**:
+           - **比例代表で投票すべき政党も、1位から3位まで**ランク付けして提案してください。
            - 「政権の監視役」「改革の推進力」など、ユーザーのスタンスに合った政党を選んでください。
 
-        3. **投票の意義とモチベーション（重要）**:
-           - なぜ今回の選挙に行くべきなのか？
-           - この1票が今の政治（${electionJson.election_meta.background}）にどう影響を与えるか？
-           - ユーザーを励まし、投票所へ足を運びたくなるような、熱意あるメッセージで締めくくってください。
+        3. **投票の意義とモチベーション**:
+           - なぜ今回の選挙に行くべきなのか、熱意あるメッセージで締めくくってください。
 
         `;
 

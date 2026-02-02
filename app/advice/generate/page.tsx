@@ -56,11 +56,37 @@ export default function AdviceGeneratePage() {
                     markdownAdvice += `### 🗳️ 小選挙区（候補者）の推奨\n`;
                     markdownAdvice += `${data.overallAdvice}\n\n`;
 
-                    // 2. 比例代表アドバイス (New)
-                    if (data.proportionalAdvice) {
-                        markdownAdvice += `### 📊 比例代表（政党）の推奨\n`;
-                        markdownAdvice += `**推奨政党: ${data.proportionalAdvice.recommendedParty}**\n`;
-                        markdownAdvice += `${data.proportionalAdvice.reason}\n\n`;
+                    // 1-b. 候補者ランキング (詳細から移動)
+                    markdownAdvice += `### 👤 候補者ランキング (Top 3)\n`;
+
+                    // Sort by rank just in case
+                    const sortedCandidates = data.candidateMatches.sort((a: any, b: any) => a.rank - b.rank);
+
+                    const rankIcons = ["🥇", "🥈", "🥉"];
+
+                    sortedCandidates.forEach((c: any) => {
+                        const icon = rankIcons[c.rank - 1] || `${c.rank}位`;
+                        markdownAdvice += `#### ${icon} ${c.candidateName} (${c.party}) - マッチ度: ${c.matchScore}%\n`;
+                        markdownAdvice += `**${c.reason}**\n\n`; // Reason bold
+                        markdownAdvice += `- 経済政策: ${c.compatibility.economic}\n`;
+                        markdownAdvice += `- 社会政策: ${c.compatibility.social}\n`;
+                        // political style is a bit detailed, maybe omit for conciseness or keep if space allows. Keeping for now.
+
+                        if (c.risks) markdownAdvice += `- ⚠️ 注意点: ${c.risks}\n`;
+                        markdownAdvice += `\n`;
+                    });
+
+
+                    // 2. 比例代表ランキング (New Array)
+                    if (data.proportionalAdvice && Array.isArray(data.proportionalAdvice)) {
+                        markdownAdvice += `### 📊 比例代表（政党）の推奨 (Top 3)\n`;
+                        const sortedParties = data.proportionalAdvice.sort((a: any, b: any) => a.rank - b.rank);
+
+                        sortedParties.forEach((p: any) => {
+                            const icon = rankIcons[p.rank - 1] || `${p.rank}位`;
+                            markdownAdvice += `#### ${icon} ${p.partyName}\n`;
+                            markdownAdvice += `${p.reason}\n\n`;
+                        });
                     }
 
                     // 3. 政策一致度分析
@@ -69,25 +95,14 @@ export default function AdviceGeneratePage() {
                     markdownAdvice += `- **主な一致点**: ${data.policyAnalysis.keyMatches.join("、")}\n`;
                     markdownAdvice += `- **主な相違点**: ${data.policyAnalysis.keyDifferences.join("、")}\n\n`;
 
-                    // 4. 候補者詳細（簡潔に）
-                    markdownAdvice += `### 👤 候補者詳細データ\n`;
-                    data.candidateMatches.forEach((c: any) => {
-                        markdownAdvice += `**${c.candidateName} (${c.party})** - マッチ度: ${c.matchScore}%\n`;
-                        markdownAdvice += `- 理由: ${c.reason}\n`;
-                        if (c.risks) markdownAdvice += `- ⚠️ 注意点: ${c.risks}\n`;
-                        markdownAdvice += `\n`;
-                    });
-
-                    // 5. 投票の意義 (New)
+                    // 5. 投票の意義
                     if (data.votingSignificance) {
                         markdownAdvice += `### 🔥 あなたの1票が持つ意味\n`;
                         markdownAdvice += `${data.votingSignificance}\n\n`;
                     }
 
-                    // 思考プロセス (あれば末尾に小さく、または省略しても良いが、デバッグ用に残す)
-                    if (data.thinkingProcess) {
-                        markdownAdvice += `---\n<details><summary>AIの思考プロセス</summary>\n${data.thinkingProcess}\n</details>\n\n`;
-                    }
+                    // 思考プロセスは表示しない (cleaned up)
+                    // if (data.thinkingProcess) { ... } -> Removed as per user request to be clean
 
                     localStorage.setItem("ai_advice", markdownAdvice);
                     // バックアップとして構造化データも保存しておく
