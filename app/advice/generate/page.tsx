@@ -52,15 +52,16 @@ export default function AdviceGeneratePage() {
                     // 構造化データをMarkdown形式に変換して保存（既存の表示コンポーネントとの互換性維持のため）
                     let markdownAdvice = "";
 
-                    // 1. 総合アドバイス
+                    // 1. 総合アドバイス（小選挙区）
+                    markdownAdvice += `### 🗳️ 小選挙区（候補者）の推奨\n`;
                     markdownAdvice += `${data.overallAdvice}\n\n`;
 
-                    // 2. 思考プロセス (あれば)
-                    if (data.thinkingProcess) {
-                        markdownAdvice += `### AIの思考プロセス (Deep Thinking)\n${data.thinkingProcess}\n\n`;
+                    // 2. 比例代表アドバイス (New)
+                    if (data.proportionalAdvice) {
+                        markdownAdvice += `### 📊 比例代表（政党）の推奨\n`;
+                        markdownAdvice += `**推奨政党: ${data.proportionalAdvice.recommendedParty}**\n`;
+                        markdownAdvice += `${data.proportionalAdvice.reason}\n\n`;
                     }
-
-                    markdownAdvice += `---\n\n`;
 
                     // 3. 政策一致度分析
                     markdownAdvice += `### 🔍 政策一致度分析\n`;
@@ -68,19 +69,25 @@ export default function AdviceGeneratePage() {
                     markdownAdvice += `- **主な一致点**: ${data.policyAnalysis.keyMatches.join("、")}\n`;
                     markdownAdvice += `- **主な相違点**: ${data.policyAnalysis.keyDifferences.join("、")}\n\n`;
 
-                    // 4. 候補者との相性
-                    markdownAdvice += `### 👤 候補者・政党との相性詳細\n\n`;
+                    // 4. 候補者詳細（簡潔に）
+                    markdownAdvice += `### 👤 候補者詳細データ\n`;
                     data.candidateMatches.forEach((c: any) => {
-                        markdownAdvice += `#### ${c.candidateName} (${c.party}) - マッチ度: ${c.matchScore}%\n`;
-                        markdownAdvice += `${c.reason}\n\n`;
-                        markdownAdvice += `- **経済政策**: ${c.compatibility.economic}\n`;
-                        markdownAdvice += `- **社会政策**: ${c.compatibility.social}\n`;
-                        markdownAdvice += `- **政治スタイル**: ${c.compatibility.style}\n`;
-                        if (c.risks) {
-                            markdownAdvice += `- **⚠️ 注意点**: ${c.risks}\n`;
-                        }
+                        markdownAdvice += `**${c.candidateName} (${c.party})** - マッチ度: ${c.matchScore}%\n`;
+                        markdownAdvice += `- 理由: ${c.reason}\n`;
+                        if (c.risks) markdownAdvice += `- ⚠️ 注意点: ${c.risks}\n`;
                         markdownAdvice += `\n`;
                     });
+
+                    // 5. 投票の意義 (New)
+                    if (data.votingSignificance) {
+                        markdownAdvice += `### 🔥 あなたの1票が持つ意味\n`;
+                        markdownAdvice += `${data.votingSignificance}\n\n`;
+                    }
+
+                    // 思考プロセス (あれば末尾に小さく、または省略しても良いが、デバッグ用に残す)
+                    if (data.thinkingProcess) {
+                        markdownAdvice += `---\n<details><summary>AIの思考プロセス</summary>\n${data.thinkingProcess}\n</details>\n\n`;
+                    }
 
                     localStorage.setItem("ai_advice", markdownAdvice);
                     // バックアップとして構造化データも保存しておく

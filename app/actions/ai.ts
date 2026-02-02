@@ -42,11 +42,13 @@ const getBasePrompt = (electionName: string, userProfile: any) => `
     1. **形式**: 全ての質問は、ユーザーが「共感する」「共感しない」で明確に答えられる**「一つの肯定的な主張」または「具体的な提案」の形**で作成してください。
        - **禁止事項**: 「〜すべきか、それとも〜すべきか？」といった**二者択一形式の質問は絶対に避けてください**。どちらに共感しているか判断できなくなるためです。
        - **良い例**: 「物価高騰対策として、消費税率を時限的に5%に引き下げるべきだ。」
+    
+    【必須：以下のカテゴリをバランスよく含めること】
     2. **政策の是非**: 具体的な政策の賛否（消費税、改憲、エネルギーなど）。
-    3. **根本的な政治姿勢**: 「大きな政府か小さな政府か」「自己責任か公助か」といった価値観を、一方の立場に立った主張（例：「社会保障を充実させるために、富裕層への課税を強化すべきだ」）として作成してください。
-    4. **国家・社会観・人生観**: 同様に、一方の価値観を肯定する文章にしてください。
-
-    これらをバランスよく組み合わせ、ユーザーの深層心理を「共感度」で浮き彫りにする質問にしてください。
+    3. **根本的な政治姿勢**: 「大きな政府か小さな政府か」「自己責任か公助か」「伝統か革新か」といった哲学的な価値観を問う質問。（例：「個人の自由よりも、社会の秩序や伝統を重んじるべきだ」）
+    4. **政権・政党への好悪（重要）**: 政策の細部ではなく、**「現政権の雰囲気が好きか」「野党の批判的な姿勢に共感するか」といった、直感的な好悪**を問う質問も必ず含めてください。（例：「現在の内閣の顔ぶれや政治手法には、全体として好感が持てる」）
+    
+    これらをバランスよく組み合わせ、ユーザーの深層心理・政治的立ち位置を「共感度」で浮き彫りにする質問にしてください。
     `;
 
 export async function generateElectionQuestions(electionName: string, userProfile: any, electionLevel?: string) {
@@ -128,6 +130,73 @@ export async function generateElectionQuestions(electionName: string, userProfil
     } catch (error) {
         console.error("AI Generation Error:", error);
         return { success: false, error: "AI Generation Failed" };
+    }
+}
+
+// Single Replacement Question
+export async function generateSingleReplacementQuestion({
+    electionName,
+    userProfile,
+    excludedQuestionIds,
+    currentQuestionText
+}: {
+    electionName: string;
+    userProfile: any;
+    excludedQuestionIds: string[];
+    currentQuestionText: string;
+}) {
+    try {
+        const prompt = `
+        ${getBasePrompt(electionName, userProfile)}
+
+        【タスク: 質問の差し替え】
+        ユーザーは以下の質問に対して「関心がない/分からない」として、別の質問を求めています。
+        拒否された質問: 「${currentQuestionText}」
+
+        このユーザーのために、**全く新しい切り口の質問を1つだけ**作成してください。
+        
+        【要件】
+        1. 拒否された質問("${currentQuestionText}")とは**異なるテーマ**を選んでください。（例: 経済系が拒否されたなら、社会・価値観系の質問にするなど）
+        2. 特に**「根本的な政治姿勢（大きな政府vs小さな政府）」**や**「政権への好悪」**のように、政策知識がなくても直感的に答えやすいテーマを優先してください。
+        3. IDは "replace_${Date.now()}" のようなユニークなものにしてください。
+
+        既出のIDリスト（これらとも重複しないこと）: ${excludedQuestionIds.join(", ")}
+        `;
+
+        const singleQuestionSchema = z.object({
+            question: z.object({
+                id: z.string(),
+                text: z.string(),
+                category: z.string(),
+                questionType: z.literal("standard"),
+                analysis: z.object({
+                    merit: z.string(),
+                    demerit: z.string(),
+                    background: z.string(),
+                    impact: z.object({
+                        global: z.string(),
+                        national: z.string(),
+                        social: z.string(),
+                        economic: z.string(),
+                        welfare: z.string(),
+                        culture: z.string(),
+                        dailyLife: z.string(),
+                    }),
+                }),
+            })
+        });
+
+        const { object } = await generateObject({
+            model: google(AI_MODELS.FLASH),
+            schema: singleQuestionSchema,
+            prompt: prompt,
+        });
+
+        return { success: true, data: object.question };
+
+    } catch (error) {
+        console.error("Single Question Generation Error:", error);
+        return { success: false, error: "Failed to generate replacement question" };
     }
 }
 

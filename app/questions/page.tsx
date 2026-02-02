@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { generateAdditionalQuestions } from "@/app/actions/ai";
+import { generateAdditionalQuestions, generateSingleReplacementQuestion } from "@/app/actions/ai";
 
 type Analysis = {
     merit: string;
@@ -27,7 +27,7 @@ type Question = {
     analysis?: Analysis;
 };
 
-type Answer = "agree" | "neutral" | "disagree" | "unknown" | 1 | 2 | 3 | 4 | 5;
+type Answer = "agree" | "neutral" | "disagree" | "unknown" | "comment" | 1 | 2 | 3 | 4 | 5;
 
 export default function QuestionsPage() {
     const router = useRouter();
@@ -37,6 +37,7 @@ export default function QuestionsPage() {
     const [currentComment, setCurrentComment] = useState("");
     const [currentStep, setCurrentStep] = useState(0);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [isReplacing, setIsReplacing] = useState(false);
     const [showAnalysis, setShowAnalysis] = useState(false);
 
     useEffect(() => {
@@ -79,10 +80,47 @@ export default function QuestionsPage() {
             setShowAnalysis(false); // Reset analysis view for new question
             window.scrollTo(0, 0);
         } else {
-            // End of current list - Show options logic handled in render
-            // forcing a re-render or state check is fine, user stays on this index for "Completion" view
-            // Actually, let's introduce a "completed" state or just check index in render
             setCurrentStep(prev => prev + 1);
+        }
+    };
+
+    const handleChangeQuestion = async () => {
+        if (isReplacing) return;
+        setIsReplacing(true);
+
+        try {
+            const currentQ = questions[currentStep];
+            const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
+            const election = localStorage.getItem("target_election") || "";
+
+            // Generate replacement
+            const result = await generateSingleReplacementQuestion({
+                electionName: election,
+                userProfile: profile,
+                excludedQuestionIds: questions.map(q => q.id),
+                currentQuestionText: currentQ.text
+            });
+
+            if (result.success && result.data) {
+                const newQuestion = result.data;
+                const newQuestions = [...questions];
+                newQuestions[currentStep] = newQuestion as Question;
+                // Replace current question in place
+                setQuestions(newQuestions);
+                localStorage.setItem("generated_questions", JSON.stringify(newQuestions));
+
+                // Reset analysis view and comment for the new question
+                setShowAnalysis(false);
+                setCurrentComment("");
+                // Clear any existing answer for the old ID locally if needed (though map uses new ID)
+            } else {
+                alert("新しい質問の生成に失敗しました。");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("エラーが発生しました。");
+        } finally {
+            setIsReplacing(false);
         }
     };
 
@@ -116,22 +154,15 @@ export default function QuestionsPage() {
         return (
             <div className="max-w-xl mx-auto py-12 px-4 space-y-8 text-center animate-in fade-in">
                 <h2 className="text-3xl font-bold text-gray-800">回答ありがとうございます</h2>
-                {Object.values(answers).filter(a => a === "unknown" || a === "neutral").length >= 5 ? (
-                    <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-200 text-left space-y-3">
-                        <p className="font-bold text-yellow-800 flex items-center">
-                            <span className="mr-2 text-xl">💡</span> より詳しくあなたの考えを知るために
-                        </p>
-                        <p className="text-sm text-yellow-700 leading-relaxed">
-                            「わからない」「どちらでもない」といった回答がいくつかありました。<br />
-                            よりあなたにぴったりの候補者を見つけるために、政策の細かな是非ではなく、<strong>「大きな政府か小さな政府か」「現政権の雰囲気が好きか嫌いか」</strong>といった、より答えやすい根本的な価値観を問う質問を追加で作成することをお勧めします。
-                        </p>
-                    </div>
-                ) : (
-                    <p className="text-gray-600 leading-relaxed">
-                        現在の情報でアドバイスを作成することも可能ですが、<br />
-                        より精度の高い判定を行うために、追加の質問に答えることもできます。
+                <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 text-left space-y-3">
+                    <p className="font-bold text-blue-800 flex items-center">
+                        <span className="mr-2 text-xl">✅</span> 回答が完了しました
                     </p>
-                )}
+                    <p className="text-sm text-blue-700 leading-relaxed">
+                        あなたの政治的な価値観・好みに基づき、最適な候補者と政党を分析します。<br />
+                        もし物足りない場合は、さらに追加の質問に答えて精度を高めることも可能です。
+                    </p>
+                </div>
 
                 <div className="grid gap-4 mt-8">
                     <button
@@ -173,7 +204,14 @@ export default function QuestionsPage() {
             </div>
 
             {/* Question Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                {isReplacing && (
+                    <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
+                        <div className="animate-spin h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full mb-4"></div>
+                        <p className="text-indigo-800 font-bold">新しい質問を選んでいます...</p>
+                    </div>
+                )}
+
                 <div className="p-6 md:p-8 space-y-4">
                     <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full uppercase tracking-wider">
                         {currentQ.category}
@@ -267,30 +305,39 @@ export default function QuestionsPage() {
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <button
+                            onClick={() => handleAnswer("agree")}
+                            className="p-4 border-2 border-blue-100 bg-blue-50/50 rounded-xl hover:bg-blue-100 hover:border-blue-500 transition-all text-blue-900 font-bold"
+                        >
+                            ◯ 共感する
+                        </button>
+                        <button
+                            onClick={() => handleAnswer("disagree")}
+                            className="p-4 border-2 border-red-100 bg-red-50/50 rounded-xl hover:bg-red-100 hover:border-red-500 transition-all text-red-900 font-bold"
+                        >
+                            ✕ 共感しない
+                        </button>
+                    </div>
+
+                    {/* Answer with Comment Button */}
                     <button
-                        onClick={() => handleAnswer("agree")}
-                        className="p-4 border-2 border-blue-100 bg-blue-50/50 rounded-xl hover:bg-blue-100 hover:border-blue-500 transition-all text-blue-900 font-bold"
+                        onClick={() => handleAnswer("comment")}
+                        className="w-full p-4 border-2 border-indigo-100 bg-indigo-50/50 rounded-xl hover:bg-indigo-100 hover:border-indigo-500 transition-all text-indigo-900 font-bold flex items-center justify-center gap-2"
                     >
-                        ◯ 共感する
+                        <span>💬</span>
+                        <span>コメント内容で回答する</span>
                     </button>
+
+                    {/* Change Question Button (Replaces Neutral/Unknown) */}
                     <button
-                        onClick={() => handleAnswer("disagree")}
-                        className="p-4 border-2 border-red-100 bg-red-50/50 rounded-xl hover:bg-red-100 hover:border-red-500 transition-all text-red-900 font-bold"
+                        onClick={handleChangeQuestion}
+                        disabled={isReplacing}
+                        className="w-full p-3 border-2 border-gray-200 bg-gray-50 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all text-gray-600 font-medium text-sm flex items-center justify-center gap-2"
                     >
-                        ✕ 共感しない
-                    </button>
-                    <button
-                        onClick={() => handleAnswer("neutral")}
-                        className="p-4 border-2 border-gray-100 bg-gray-50/50 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all text-gray-700 font-medium"
-                    >
-                        △ どちらでもない
-                    </button>
-                    <button
-                        onClick={() => handleAnswer("unknown")}
-                        className="p-4 border-2 border-slate-200 bg-slate-100 rounded-xl hover:bg-slate-200 hover:border-slate-400 transition-all text-slate-600 font-medium"
-                    >
-                        ？ 分からない・関心ない
+                        <span>🔄</span>
+                        <span>興味がない／分からないので質問を変える</span>
                     </button>
                 </div>
             )}

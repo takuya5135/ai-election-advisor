@@ -45,7 +45,7 @@ export default function AdvicePage() {
             <div className="bg-white p-6 md:p-10 rounded-xl shadow-lg border border-indigo-100 print:shadow-none print:border-none print:p-0">
                 <div className="flex items-center space-x-4 mb-6">
                     <div className="text-4xl">💡</div>
-                    <h1 className="text-2xl font-bold text-gray-800">アドバイス結果</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">AI選挙アドバイザーによる分析結果</h1>
                 </div>
 
                 <div className="prose prose-blue max-w-none text-gray-700">

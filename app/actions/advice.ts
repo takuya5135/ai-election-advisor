@@ -26,7 +26,12 @@ const AdviceSchema = z.object({
         }),
         risks: z.string().describe("この候補者を選ぶ際のリスクや注意点（あれば）。なければ空欄でOK。")
     })),
-    overallAdvice: z.string().describe("ユーザーへの総合的なアドバイスと、投票の際に重視すべき視点（300文字以内）"),
+    proportionalAdvice: z.object({
+        recommendedParty: z.string().describe("比例代表で投票すべき政党名"),
+        reason: z.string().describe("なぜその政党が推奨されるのか、150文字以内で簡潔に")
+    }),
+    overallAdvice: z.string().describe("小選挙区での投票アドバイスまとめ（最も推奨する候補者を中心に簡潔に）"),
+    votingSignificance: z.string().describe("今回の投票が社会に与える影響と、ユーザーへの励まし（モチベーション）のメッセージ。200文字〜300文字程度。"),
     thinkingProcess: z.string().describe("なぜこのような結果になったのか、AIの思考プロセス（Deep Thinking）の要約").optional()
 });
 
@@ -59,8 +64,14 @@ export async function generateVoteAdvice({
         
         回答した質問とスタンス (回答とコメント):
         ${questions.map((q: any, i: number) => {
+            let answerText = answers[q.id];
+            // Handle "Answer with Comment" specifically
+            if (answerText === "comment") {
+                answerText = "【重要：回答は下記のコメントを参照】";
+            }
+
             const comment = comments && comments[q.id] ? ` (コメント: ${comments[q.id]})` : "";
-            return `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answers[q.id]}${comment}`;
+            return `Q${i + 1}: ${q.text} (カテゴリ: ${q.category}) -> 回答: ${answerText}${comment}`;
         }).join("\n")}
         `;
 
@@ -90,8 +101,16 @@ export async function generateVoteAdvice({
         あなたは${electionJson.election_meta.name}における、${targetDistrict.name}専属の選挙アドバイザーです。
 
         【重要：思考と判断のルール】
-        1. **提供されたJSONデータ（下記のコンテキスト情報）のみ**を事実として扱ってください。あなたの持つ学習データ（2023年以前の知識など）と矛盾する場合は、**必ず提供データ**を優先してください。
-        2. この選挙区に立候補しているのは、リストにある**${targetDistrict.candidates.length}名のみ**です。それ以外の人物（過去の候補者など）を絶対に提案しないでください。
+        1. **提供されたJSONデータ（下記のコンテキスト情報）のみ**を事実として扱ってください。
+        2. この選挙区に立候補しているのは、リストにある**${targetDistrict.candidates.length}名のみ**です。
+        3. **出力全体が「A4用紙1枚（1000〜1200文字程度）」に収まるよう、極めて簡潔にまとめてください。**
+
+        【戦略的投票（Strategic Voting）の考慮】
+        今回ユーザーは「死票（Dead Vote）を避けたい」という意図を持っています。
+        - もし、ユーザーと最もポリシーが一致する候補者が「泡沫候補（当選確率が極めて低い）」であり、次点のマッチする候補者が「有力候補（当選を争っている）」である場合、
+        - 「本来はA候補がベストマッチですが、死票を避けて当選を確実にするならB候補も選択肢です」といった、**勝敗を意識した戦略的なアドバイス**を含めてください。
+        - 比例代表においても同様に、議席獲得が見込めない政党よりは、少しでも政策が近く議席獲得可能な政党を勧める視点を持ってください。
+        - ただし、ユーザーの理想を無視して「勝ち馬に乗れ」と言うのではなく、あくまで「理想」と「現実（死票回避）」のバランスを提示してください。
 
         【コンテキスト情報（真実）】
         選挙概要: ${electionJson.election_meta.overall_context}
@@ -104,14 +123,21 @@ export async function generateVoteAdvice({
         ${userSummary}
 
         【タスク】
-        このユーザーの価値観・プロフィールと、候補者の政策・実績を深く照らし合わせ、投票すべき候補者を論理的に提案してください。
-        
-        1. ユーザーの本音（重視する政策、経済観、安定志向か改革志向かなど）を分析する。
-        2. 候補者リストの中から、最も相性の良い人物を選定する。
-        3. なぜその候補者が良いのか、具体的な「政策」や「スローガン」を引用して説明する。
-        4. "リスク"も公平に指摘する（例：中道改革連合は財源に不安、自維連合は格差拡大の懸念など、提供データに基づき推論する）。
+        以下の構成でアドバイスを作成してください。
 
-        思考プロセス（Deep Thinking）を行い、ユーザーにとって納得感のあるアドバイスを作成してください。
+        1. **小選挙区（候補者）のアドバイス**:
+           - 最も推奨する候補者を1名（または接戦なら2名）選び、その理由を簡潔に。
+           - ユーザーの重視する政策との合致点を示してください。
+
+        2. **比例代表（政党）のアドバイス**:
+           - 候補者個人だけでなく、**政党（比例代表）**としてどこに投票すべきかも提案してください。
+           - 「政権の監視役」「改革の推進力」など、ユーザーのスタンスに合った政党を選んでください。
+
+        3. **投票の意義とモチベーション（重要）**:
+           - なぜ今回の選挙に行くべきなのか？
+           - この1票が今の政治（${electionJson.election_meta.background}）にどう影響を与えるか？
+           - ユーザーを励まし、投票所へ足を運びたくなるような、熱意あるメッセージで締めくくってください。
+
         `;
 
         const { object } = await generateObject({
