@@ -94,18 +94,39 @@ export default function QuestionsPage() {
             const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
             const election = localStorage.getItem("target_election") || "";
 
-            // Generate replacement
-            const result = await generateSingleReplacementQuestion({
-                electionName: election,
-                userProfile: profile,
-                excludedQuestionIds: questions.map(q => q.id),
-                currentQuestionText: currentQ.text
-            });
+            // 1. Try to get a replacement from the pool first
+            const currentIds = questions.map(q => q.id);
+            let newQuestion: Question | null = null;
 
-            if (result.success && result.data) {
-                const newQuestion = result.data;
+            try {
+                const poolResult = await getAdditionalQuestionsFromPool(currentIds, 1);
+                if (poolResult.success && poolResult.data && poolResult.data.length > 0) {
+                    console.log("Replacement found in pool.");
+                    newQuestion = poolResult.data[0];
+                }
+            } catch (err) {
+                console.error("Pool replacement error:", err);
+            }
+
+            // 2. Fallback to Live AI if pool didn't return a question
+            if (!newQuestion) {
+                console.log("Pool exhausted, generating replacement via AI.");
+                const result = await generateSingleReplacementQuestion({
+                    electionName: election,
+                    userProfile: profile,
+                    excludedQuestionIds: questions.map(q => q.id),
+                    currentQuestionText: currentQ.text
+                });
+
+                if (result.success && result.data) {
+                    newQuestion = result.data as Question;
+                }
+            }
+
+            if (newQuestion) {
+                // Common update logic
                 const newQuestions = [...questions];
-                newQuestions[currentStep] = newQuestion as Question;
+                newQuestions[currentStep] = newQuestion;
                 // Replace current question in place
                 setQuestions(newQuestions);
                 localStorage.setItem("generated_questions", JSON.stringify(newQuestions));
@@ -113,7 +134,7 @@ export default function QuestionsPage() {
                 // Reset analysis view and comment for the new question
                 setShowAnalysis(false);
                 setCurrentComment("");
-                // Clear any existing answer for the old ID locally if needed (though map uses new ID)
+                // Clear any existing answer for the old ID
             } else {
                 alert("新しい質問の生成に失敗しました。");
             }
