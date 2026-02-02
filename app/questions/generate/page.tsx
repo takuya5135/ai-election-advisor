@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { generateElectionQuestions } from "@/app/actions/ai";
+import { getQuestionsFromPool } from "@/app/actions/question_service";
 
 export default function GenerateQuestionsPage() {
     const router = useRouter();
@@ -15,6 +15,7 @@ export default function GenerateQuestionsPage() {
             localStorage.removeItem("user_answers");
             localStorage.removeItem("user_comments");
             localStorage.removeItem("ai_advice");
+            localStorage.removeItem("generated_questions");
 
             const profileStr = localStorage.getItem("user_profile");
             const electionStr = localStorage.getItem("target_election");
@@ -26,18 +27,22 @@ export default function GenerateQuestionsPage() {
 
             setStatus("選挙情報を収集中...");
             // In a real app, we might fetch candidate data here first to inform the AI.
+            // For now, we simulate a brief delay or just proceed since we have static data.
+            await new Promise(resolve => setTimeout(resolve, 800));
 
             setStatus("政治的スタンスを判定する質問を作成中...");
 
             try {
-                const level = localStorage.getItem("target_election_level") || undefined;
-                const result = await generateElectionQuestions(electionStr, JSON.parse(profileStr), level);
+                // Use the new Pool Service instead of live AI
+                const result = await getQuestionsFromPool(JSON.parse(profileStr), electionStr);
 
                 if (result.success && result.data) {
                     localStorage.setItem("generated_questions", JSON.stringify(result.data));
+                    // Add a small delay so the user sees the message
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     router.push("/questions");
                 } else {
-                    setError("質問の生成に失敗しました。APIキーを確認してください。");
+                    setError("質問の生成に失敗しました。");
                 }
 
             } catch (err) {

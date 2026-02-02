@@ -1,0 +1,1254 @@
+{
+    "questions": [
+        {
+            "id": "admin_econ",
+            "text": "経済・財政政策（生活実感や物価高対応など）における現政権の実績を、あなたはどの程度評価しますか？",
+            "category": "Economy",
+            "topics": [
+                "政権評価",
+                "経済",
+                "物価高"
+            ],
+            "questionType": "administration_evaluation",
+            "analysis": {
+                "merit": "株価維持や名目賃金の上昇が見られる。",
+                "demerit": "インフレに賃金が追いつかず、実益が乏しいとの批判がある。",
+                "background": "アベノミクス以降の出口戦略と物価高対策の成否が問われている。",
+                "impact": {
+                    "dailyLife": "生活費の負担感に直結。",
+                    "economic": "景気動向を左右。",
+                    "social": "格差の拡大・縮小。",
+                    "national": "経済力の維持。",
+                    "global": "円相場への影響。",
+                    "welfare": "財源確保。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "admin_diplomacy",
+            "text": "外交・安全保障（日米関係、近隣諸国外交など）における現政権の実績を、あなたはどの程度評価しますか？",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "政権評価",
+                "外交",
+                "安全保障"
+            ],
+            "questionType": "administration_evaluation",
+            "analysis": {
+                "merit": "日米同盟の強化やQUAD等の多国間連携の深化。",
+                "demerit": "近隣諸国との緊張緩和に向けた対話不足の指摘。",
+                "background": "台湾有事リスクや北朝鮮情勢への対応が評価の柱。",
+                "impact": {
+                    "dailyLife": "地政学リスクの低減。",
+                    "economic": "経済安保の確立。",
+                    "social": "防衛意識の変化。",
+                    "national": "主権の維持。",
+                    "global": "国際的プレゼンス。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "admin_social",
+            "text": "社会保障・内政（子育て、医療・介護、雇用など）における現政権の実績を、あなたはどの程度評価しますか？",
+            "category": "Social",
+            "topics": [
+                "政権評価",
+                "社会保障",
+                "内政"
+            ],
+            "questionType": "administration_evaluation",
+            "analysis": {
+                "merit": "子育て予算の拡充（所得制限撤廃等）の推進。",
+                "demerit": "社会保険料増など国民負担の増加に対する不満。",
+                "background": "少子高齢化の加速に対する実効性が問われている。",
+                "impact": {
+                    "dailyLife": "育児や老後の安心感。",
+                    "economic": "現役世代の可処分所得。",
+                    "social": "世代間公平。",
+                    "national": "人口減の抑制。",
+                    "global": "なし",
+                    "welfare": "制度持続性。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "admin_governance",
+            "text": "政治姿勢・統治能力（政治とカネ、不祥事への対応など）における現政権の実績を、あなたはどの程度評価しますか？",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "政権評価",
+                "政治とカネ",
+                "統治能力"
+            ],
+            "questionType": "administration_evaluation",
+            "analysis": {
+                "merit": "政治資金規正法の改正による透明性向上への着手。",
+                "demerit": "裏金問題の全容解明不足や説明責任の欠如。",
+                "background": "2024年の政治不信を乗り越えられたか、第51回選挙の核心。",
+                "impact": {
+                    "dailyLife": "政治への期待感。",
+                    "economic": "なし。",
+                    "social": "法治への信頼。",
+                    "national": "民主主義の健全性。",
+                    "global": "政治的安定性。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "admin_values",
+            "text": "多様性・価値観（選択的夫婦別姓、LGBTQ理解増進など）への対応における現政権の実績を、あなたはどの程度評価しますか？",
+            "category": "Values",
+            "topics": [
+                "政権評価",
+                "多様性",
+                "ジェンダー"
+            ],
+            "questionType": "administration_evaluation",
+            "analysis": {
+                "merit": "LGBT理解増進法の施行や女性活躍の数値目標設定。",
+                "demerit": "保守層への配慮により、法的な制度改正が停滞しているとの批判。",
+                "background": "個人の尊重と伝統の維持をどう調整したかが焦点。",
+                "impact": {
+                    "dailyLife": "マイノリティの生きやすさ。",
+                    "economic": "多様な人材活用。",
+                    "social": "寛容な社会。",
+                    "national": "人権水準向上。",
+                    "global": "G7基準への適合。",
+                    "welfare": "なし",
+                    "culture": "家族観の変容。"
+                }
+            }
+        },
+        {
+            "id": "q_econ_01",
+            "text": "物価高騰対策として、消費税率は時限的に5%以下に引き下げるべきだ。",
+            "category": "Economy",
+            "topics": [
+                "消費税",
+                "物価高",
+                "減税"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "家計の負担が直接減り、消費を強力に刺激できる。",
+                "demerit": "社会保障財源が大きく失われ、将来の負担増を招く。",
+                "background": "生活防衛を求める声と財政規律の維持が対立。",
+                "impact": {
+                    "dailyLife": "買い物時の支払額減少。",
+                    "economic": "内需拡大。",
+                    "social": "逆進性緩和。",
+                    "national": "公債増発の懸念。",
+                    "global": "なし",
+                    "welfare": "福祉サービスの質低下リスク。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_02",
+            "text": "格差是正のため、株式譲渡益などの金融所得課税を20%から引き上げるべきだ。",
+            "category": "Economy",
+            "topics": [
+                "金融所得課税",
+                "格差是正",
+                "富の再分配"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "高所得層からの税収を増やし、再分配機能を強化できる。",
+                "demerit": "投資意欲を減退させ、日本市場からの資本逃避を招く。",
+                "background": "「1億円の壁」を打破し、所得の不平等を解消する狙い。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "株価や投資行動への影響。",
+                    "social": "格差の是正。",
+                    "national": "税収増。",
+                    "global": "なし",
+                    "welfare": "社会保障財源。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_03",
+            "text": "最低賃金を全国一律で速やかに1500円以上へ引き上げるべきだ。",
+            "category": "Economy",
+            "topics": [
+                "最低賃金",
+                "労働",
+                "中小企業"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "低賃金労働者の生活を底上げし、地域間格差を解消できる。",
+                "demerit": "中小企業の経営を圧迫し、倒産や雇い止めが増える恐れがある。",
+                "background": "物価上昇に負けない賃金構造への転換が急務。",
+                "impact": {
+                    "dailyLife": "非正規層の収入増。",
+                    "economic": "生産性向上への圧力。",
+                    "social": "ワーキングプアの解消。",
+                    "national": "なし",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_05",
+            "text": "防衛費増額の財源として、法人税や所得税の「増税」はやむを得ない。",
+            "category": "Economy",
+            "topics": [
+                "防衛増税",
+                "財政",
+                "防衛力強化"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "国債発行（借金）を抑え、将来世代への負担を減らしつつ防衛力を高められる。",
+                "demerit": "企業の投資意欲を削ぎ、景気を冷え込ませる。",
+                "background": "防衛力強化と財政再建の優先順位が問われている。",
+                "impact": {
+                    "dailyLife": "所得の減少感。",
+                    "economic": "経済成長の鈍化懸念。",
+                    "social": "なし",
+                    "national": "財政の健全性。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_06",
+            "text": "相続税を強化し、富の世代間継承を抑制して、若者世代への直接的な支援に充てるべきだ。",
+            "category": "Economy",
+            "topics": [
+                "相続税",
+                "格差是正",
+                "若者支援"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "資産格差の固定化を防ぎ、機会の平等性を高められる。",
+                "demerit": "親の資産を守る動機を削ぎ、海外への資産逃避を招く可能性がある。",
+                "background": "親の経済力で将来が決まる「親ガチャ」論議への政策的対応。",
+                "impact": {
+                    "dailyLife": "資産継承の制限。",
+                    "economic": "富の流動化。",
+                    "social": "階層社会の抑制。",
+                    "national": "なし",
+                    "global": "なし",
+                    "welfare": "次世代への投資財源。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_07",
+            "text": "ガソリン税を一時的に下げる「トリガー条項」の凍結を解除し、燃料価格を抑制すべきだ。",
+            "category": "Economy",
+            "topics": [
+                "トリガー条項",
+                "ガソリン税",
+                "物価高"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "車社会の地方住民や物流業者の負担を即座に軽減できる。",
+                "demerit": "国と地方の税収が大幅に減り、道路維持等の財源が不足する。",
+                "background": "燃料高騰が続く中、補助金方式か減税方式かの対立。",
+                "impact": {
+                    "dailyLife": "移動・配送コストの低下。",
+                    "economic": "インフレ抑制効果。",
+                    "social": "なし",
+                    "national": "税収の減少。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_08",
+            "text": "食料自給率を高めるため、国内農家への補助金を大幅に増やし、安価な海外製品から保護すべきだ。",
+            "category": "Economy",
+            "topics": [
+                "食料安保",
+                "農業",
+                "保護貿易"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "有事の際の食料安全保障を確立し、農村経済を守れる。",
+                "demerit": "食品価格が上昇し、家計負担増と自由貿易の停滞を招く。",
+                "background": "地政学リスク下での自給能力の重要性が再認識されている。",
+                "impact": {
+                    "dailyLife": "食品の安定確保と価格高騰リスク。",
+                    "economic": "一次産業の活性化。",
+                    "social": "地域コミュニティ維持。",
+                    "national": "生存基盤の確保。",
+                    "global": "貿易摩擦のリスク。",
+                    "welfare": "なし",
+                    "culture": "農村風景の維持。"
+                }
+            }
+        },
+        {
+            "id": "q_econ_10",
+            "text": "ライドシェアを全国的に解禁し、タクシー不足を解消するとともに個人の所得機会を増やすべきだ。",
+            "category": "Economy",
+            "topics": [
+                "ライドシェア",
+                "規制緩和",
+                "モビリティ"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "地方や観光地の交通難を安価かつ迅速に解消できる。",
+                "demerit": "事故時の責任が曖昧であり、既存のタクシー産業が打撃を受ける。",
+                "background": "人手不足と観光立国の推進に向けた規制改革の焦点。",
+                "impact": {
+                    "dailyLife": "移動の利便性向上。",
+                    "economic": "シェアリングエコノミーの拡大。",
+                    "social": "なし",
+                    "national": "なし",
+                    "global": "世界基準への適応。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_econ_11",
+            "text": "日本銀行は金利を引き上げ、長期間続いた超低金利政策を完全に終了させるべきだ。",
+            "category": "Economy",
+            "topics": [
+                "金利政策",
+                "日本銀行",
+                "円安対策"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "過度な円安を抑え、輸入品の価格高騰を抑制できる。",
+                "demerit": "住宅ローン金利や中小企業の借入コストが上昇し、景気を冷やす。",
+                "background": "異次元緩和の副作用（円安、格差拡大）の解消が急務。",
+                "impact": {
+                    "dailyLife": "預金利息増とローン負担増。",
+                    "economic": "経済の正常化と企業淘汰。",
+                    "social": "なし",
+                    "national": "なし",
+                    "global": "国際金融市場との調和。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_social_01",
+            "text": "希望すれば結婚前の姓を維持できる「選択的夫婦別姓」を直ちに導入すべきだ。",
+            "category": "Social",
+            "topics": [
+                "選択的夫婦別姓",
+                "ジェンダー",
+                "人権"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "個人のアイデンティティやキャリアの継続性が保障される。",
+                "demerit": "家族の一体感が損なわれ、子供に悪影響があるとの懸念。",
+                "background": "最高裁が違憲判断を見送る中、世論は賛成派が増加傾向。",
+                "impact": {
+                    "dailyLife": "改姓に伴う事務負担の消失。",
+                    "economic": "なし。",
+                    "social": "個人の自由拡大。",
+                    "national": "なし",
+                    "global": "G7唯一の義務制度の解消。",
+                    "welfare": "なし",
+                    "culture": "伝統的家族観の相対化。"
+                }
+            }
+        },
+        {
+            "id": "q_social_02",
+            "text": "同性婚を法律で認め、異性間の結婚と同等の法的権利を保障すべきだ。",
+            "category": "Social",
+            "topics": [
+                "同性婚",
+                "LGBTQ",
+                "多様性"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "性的マイノリティの権利が確立され、差別や不利益が解消される。",
+                "demerit": "伝統的な婚姻概念を崩壊させるとの強い反対意見がある。",
+                "background": "地方自治体でのパートナーシップ制度拡大と、司法判断の加速。",
+                "impact": {
+                    "dailyLife": "当事者の法的保護（相続等）。",
+                    "economic": "なし。",
+                    "social": "寛容な社会の実現。",
+                    "national": "人権水準の国際適応。",
+                    "global": "先進国基準への追随。",
+                    "welfare": "なし",
+                    "culture": "結婚観の変容。"
+                }
+            }
+        },
+        {
+            "id": "q_social_03",
+            "text": "人手不足解消のため、一定の条件を満たす外国人労働者の永住権取得をさらに容易にすべきだ。",
+            "category": "Social",
+            "topics": [
+                "移民政策",
+                "外国人労働者",
+                "人口減"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "優秀な人材を定着させ、労働力不足による経済縮小を防げる。",
+                "demerit": "治安の悪化や日本の文化的アイデンティティの喪失を懸念する声。",
+                "background": "「技能実習」から「育成就労」への転換に伴う共生議論。",
+                "impact": {
+                    "dailyLife": "多文化社会の日常化。",
+                    "economic": "労働力確保とGDP維持。",
+                    "social": "多様性の受容と摩擦リスク。",
+                    "national": "なし。",
+                    "global": "人材獲得競争力。",
+                    "welfare": "納税者の増加。",
+                    "culture": "単一民族意識の変化。"
+                }
+            }
+        },
+        {
+            "id": "q_social_04",
+            "text": "所得制限を設けず、大学までの教育費を完全に無償化すべきだ。",
+            "category": "Social",
+            "topics": [
+                "教育無償化",
+                "奨学金",
+                "少子化対策"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "親の収入にかかわらず教育機会が平等になり、人材育成が進む。",
+                "demerit": "膨大な財源を必要とし、高所得層への支援は不公平との声もある。",
+                "background": "「教育の機会均等」と少子化対策の柱としての議論。",
+                "impact": {
+                    "dailyLife": "家計負担の劇的な軽減。",
+                    "economic": "長期的な生産性向上。",
+                    "social": "機会の平等実現。",
+                    "national": "国力維持。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_social_05",
+            "text": "マイナ保険証への一本化を完遂し、現行の健康保険証は完全に廃止すべきだ。",
+            "category": "Social",
+            "topics": [
+                "マイナンバー",
+                "医療DX",
+                "行政効率化"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "重複投薬の防止や事務の超効率化により、医療の質と財政が改善する。",
+                "demerit": "個人情報の漏洩不安や、高齢者等のデジタル弱者が排除されるリスク。",
+                "background": "デジタル政府の基盤構築における最大の論争点。",
+                "impact": {
+                    "dailyLife": "カード1枚で受診可能。",
+                    "economic": "行政・医療コスト削減。",
+                    "social": "デジタル格差の顕在化。",
+                    "national": "データ基盤の整備。",
+                    "global": "なし",
+                    "welfare": "精密医療の推進。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_social_06",
+            "text": "若者の社会保険料負担を減らすため、高齢者の医療費窓口負担を原則3割に引き上げるべきだ。",
+            "category": "Social",
+            "topics": [
+                "高齢者医療",
+                "世代間格差",
+                "社会保障改革"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "現役世代の手取りを増やし、世代間の負担の不均衡を是正できる。",
+                "demerit": "低所得の高齢者が受診を控え、健康状態が悪化する恐れがある。",
+                "background": "「全世代型社会保障」への転換に向けた痛み。",
+                "impact": {
+                    "dailyLife": "高齢者の支払増。現役の手取り増。",
+                    "economic": "若年層の消費拡大。",
+                    "social": "世代間対立の懸念。",
+                    "national": "社会保障財政の安定。",
+                    "global": "なし",
+                    "welfare": "制度の持続性向上。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_social_07",
+            "text": "児童虐待やいじめを防ぐため、公立学校にスクールカウンセラー等の専門職を義務化して常駐させるべきだ。",
+            "category": "Social",
+            "topics": [
+                "児童福祉",
+                "教育環境",
+                "メンタルケア"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "問題の早期発見が可能になり、教員の負担も軽減できる。",
+                "demerit": "人件費等の財源確保が難しく、他予算を圧迫する可能性がある。",
+                "background": "不登校や児童虐待が過去最多を更新し続けている深刻な事態。",
+                "impact": {
+                    "dailyLife": "学校での安全・安心感。",
+                    "economic": "なし。",
+                    "social": "社会的孤立の防止。",
+                    "national": "将来世代の保護。",
+                    "global": "なし",
+                    "welfare": "福祉と教育の融合。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_social_09",
+            "text": "SNS上の誹謗中傷に対し、投稿者の特定を今以上に容易にし、厳罰化をさらに進めるべきだ。",
+            "category": "Social",
+            "topics": [
+                "SNS",
+                "誹謗中傷",
+                "表現の自由"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "ネット上の深刻な人権侵害を抑止し、被害者の命と尊厳を守れる。",
+                "demerit": "政府への批判が抑制されるなど、表現の自由が侵害される恐れがある。",
+                "background": "ネット上の書き込みを原因とした悲劇が相次いでいることへの対策。",
+                "impact": {
+                    "dailyLife": "安全なネット利用環境。",
+                    "economic": "なし。",
+                    "social": "リテラシー向上と監視のトレードオフ。",
+                    "national": "人権保護の徹底。",
+                    "global": "なし",
+                    "welfare": "精神的健康の保護。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_social_10",
+            "text": "ギャンブル依存症患者を増やす恐れがあるため、カジノ（IR）の開業計画は全面的に中止すべきだ。",
+            "category": "Social",
+            "topics": [
+                "カジノ",
+                "IR",
+                "依存症対策"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "依存症による家庭崩壊や治安悪化などの社会的損失を未然に防げる。",
+                "demerit": "観光収入や地域経済の活性化、雇用の創出機会を失う。",
+                "background": "大阪などで進むIR計画の是非が地方自治の枠を超えて論点化。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "観光・投資機会の喪失。",
+                    "social": "健全な倫理観の維持。",
+                    "national": "なし",
+                    "global": "なし",
+                    "welfare": "精神保健の保護。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_01",
+            "text": "憲法9条を改正し、自衛隊の存在と役割を憲法に明記すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "憲法改正",
+                "自衛隊",
+                "9条"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "自衛隊の憲法上の位置づけを明確にし、違憲論争に終止符を打つ。",
+                "demerit": "戦後日本の平和主義が形骸化し、武力行使の拡大を招くとの懸念。",
+                "background": "「反撃能力」保有など安保政策が転換する中での法的整合性議論。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "なし。",
+                    "social": "安保への国民意識変化。",
+                    "national": "国の基本法の正常化。",
+                    "global": "同盟国・周辺国へのシグナル。",
+                    "welfare": "なし",
+                    "culture": "戦後レジームの脱却。"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_02",
+            "text": "周辺国の脅威に備え、敵のミサイル基地などを攻撃する「反撃能力」の配備をさらに加速すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "反撃能力",
+                "安全保障",
+                "抑止力"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "攻撃の代償を突きつけることで、有事の発生を未然に防ぐ抑止力を高める。",
+                "demerit": "専守防衛の原則を逸脱し、近隣諸国との軍拡競争を招くリスク。",
+                "background": "ミサイル技術の高度化に対し、従来の迎撃のみでは不十分との認識。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "防衛産業の振興。",
+                    "social": "なし。",
+                    "national": "防衛力の質的転換。",
+                    "global": "日米役割分担の変化。",
+                    "welfare": "予算の競合。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_04",
+            "text": "世襲議員を制限するため、親と同じ選挙区から連続して立候補することを法律で禁止すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "世襲議員",
+                "政治改革",
+                "既得権益"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "政治の家業化を防ぎ、地盤のない有能な新人の参入を促す。",
+                "demerit": "憲法が保障する「職業選択の自由」を侵害するとの憲法上の懸念。",
+                "background": "日本の政治家、特に中枢の世襲率の高さが政治の固定化を招いている批判。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "なし。",
+                    "social": "既得権打破の象徴。",
+                    "national": "政治の流動性向上。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_05",
+            "text": "政治の透明性を確保するため、企業・団体による政治献金を例外なく全面的に禁止すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "企業献金",
+                "政治資金",
+                "裏金問題"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "特定組織による政治への不当な影響を断ち、公平な政策決定を担保できる。",
+                "demerit": "政治資金が不足し、若手や新人の活動が困難になる恐れがある。",
+                "background": "裏金問題を受けた政治改革の最重要争点。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "特定業界優遇の是正。",
+                    "social": "政治への信頼回復。",
+                    "national": "民主主義の健全化。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_06",
+            "text": "拉致問題解決を最優先し、首相が前提条件なしで北朝鮮との首脳会談に臨むべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "拉致問題",
+                "北朝鮮",
+                "外交交渉"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "長期化した膠着状態を打破し、被害者帰国の糸口を見出せる可能性がある。",
+                "demerit": "相手の核・ミサイル開発を容認するようなメッセージとして利用されるリスク。",
+                "background": "ご家族の高齢化により一刻の猶予もない状況への対応。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "なし。",
+                    "social": "なし。",
+                    "national": "主権の完全な回復。",
+                    "global": "地域緊張緩和への貢献。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_07",
+            "text": "一票の格差を解消するため、地方の選挙区を統合し、人口比率に応じた定数配分を徹底すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "一票の格差",
+                "定数是正",
+                "地方切り捨て"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "全ての有権者の一票の重みを平等にし、憲法の精神を遵守できる。",
+                "demerit": "地方の代表が減ることで、地方の声が国政に届きにくくなり、過疎化を助長する。",
+                "background": "都市集中が加速する中、代表制民主主義の根幹が問われている。",
+                "impact": {
+                    "dailyLife": "地元選出議員の不在。",
+                    "economic": "なし。",
+                    "social": "公平感の醸成。",
+                    "national": "民主主義の正当性。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "地域性の喪失。"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_08",
+            "text": "緊急時の迅速な法整備のため、災害やパンデミック時に政府が強い権限を持つ「緊急事態条項」を憲法に新設すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "緊急事態条項",
+                "憲法改正",
+                "危機管理"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "大規模な有事において、迅速な意思決定と国民の安全確保が可能になる。",
+                "demerit": "基本的人権が不当に制限され、政府による独裁的な統治を許す危険性。",
+                "background": "コロナ禍や大地震での法制度の限界を教訓とした議論。",
+                "impact": {
+                    "dailyLife": "有事の私権制限。",
+                    "economic": "なし。",
+                    "social": "国家権力の肥大リスク。",
+                    "national": "危機管理能力の法制化。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_10",
+            "text": "サイバー攻撃を未然に防ぐため、政府が通信情報を監視・遮断できる「能動的サイバー防御」を法制化すべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "サイバー安保",
+                "通信の秘密",
+                "経済安保"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "重要インフラ（電力・金融等）への攻撃を阻止し、国家の機能を守れる。",
+                "demerit": "憲法が保障する「通信の秘密」を侵害し、不当な監視に繋がる恐れ。",
+                "background": "現代の戦争が物理からデジタル空間にシフトしていることへの対応。",
+                "impact": {
+                    "dailyLife": "インフラ停止の回避。",
+                    "economic": "企業の機密保護。",
+                    "social": "なし。",
+                    "national": "現代的防衛力の構築。",
+                    "global": "同盟国との情報共有強化。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_diplomacy_11",
+            "text": "日本国内の米軍基地の負担を公平にするため、沖縄以外の地域への移設を積極的に進めるべきだ。",
+            "category": "Diplomacy/Governance",
+            "topics": [
+                "沖縄基地問題",
+                "日米同盟",
+                "公平性"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "沖縄に偏る過重な基地負担を軽減し、国民全体の当事者意識を高める。",
+                "demerit": "移設先地域の反発や、地政学的な抑止力の低下を招くリスク。",
+                "background": "長年の課題である沖縄の基地負担軽減と日米安保の維持の両立。",
+                "impact": {
+                    "dailyLife": "移設先での治安・騒音影響。",
+                    "economic": "地方経済への影響。",
+                    "social": "世代・地域間の不満解消。",
+                    "national": "同盟の安定維持。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_values_01",
+            "text": "政府は市場競争に任せる「小さな政府」よりも、税負担は大きくても社会保障が充実した「大きな政府」を目指すべきだ。",
+            "category": "Values",
+            "topics": [
+                "大きな政府",
+                "税負担",
+                "福祉国家"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "セーフティネットが厚くなり、格差や将来不安が軽減される。",
+                "demerit": "高い税率が経済の活力を削ぎ、官僚機構の肥大化を招く。",
+                "background": "新自由主義（自己責任）か中負担・中福祉かの根源的な価値観の対立。",
+                "impact": {
+                    "dailyLife": "納税額と受け取るサービスの増減。",
+                    "economic": "所得再分配の強化。",
+                    "social": "安心感の醸成。",
+                    "national": "持続可能な福祉国家像。",
+                    "global": "なし",
+                    "welfare": "サービス充実。",
+                    "culture": "依存と自立のバランス。"
+                }
+            }
+        },
+        {
+            "id": "q_values_02",
+            "text": "安定供給と脱炭素のため、安全が確認された原子力発電所は今後も積極的に活用すべきだ。",
+            "category": "Values",
+            "topics": [
+                "エネルギー政策",
+                "原発再稼働",
+                "脱炭素"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "電気料金を抑制し、化石燃料への依存度を下げて脱炭素を実現できる。",
+                "demerit": "事故時の取り返しのつかないリスクや、核のゴミ問題が解決されていない。",
+                "background": "再エネ主力化までの現実的な「つなぎ」か、決別かの論争。",
+                "impact": {
+                    "dailyLife": "電気料金の価格変動。",
+                    "economic": "製造業のコスト競争力。",
+                    "social": "安全への不安感。",
+                    "national": "エネルギー自給率向上。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_values_03",
+            "text": "困窮した際は国に頼るよりも、まずは自分や家族が努力する「自己責任（自助）」を重視する社会が望ましい。",
+            "category": "Values",
+            "topics": [
+                "自助",
+                "自己責任",
+                "生活保護"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "過度な国家依存を減らし、個人の主体的な自立と経済の活力を促す。",
+                "demerit": "助けを得られない弱者が放置され、格差や孤独を深刻化させる。",
+                "background": "「自助・共助・公助」の優先順位を巡る政治姿勢の対立点。",
+                "impact": {
+                    "dailyLife": "個人の備えへの意識。",
+                    "economic": "公的支出の抑制。",
+                    "social": "弱者への冷淡さリスク。",
+                    "national": "なし",
+                    "global": "なし",
+                    "welfare": "給付基準への影響。",
+                    "culture": "連帯か競争かの国民性。"
+                }
+            }
+        },
+        {
+            "id": "q_values_04",
+            "text": "国会議員や管理職の女性比率を一定以上とする「クオータ制」を法的に導入すべきだ。",
+            "category": "Values",
+            "topics": [
+                "クオータ制",
+                "女性活躍",
+                "ジェンダー平等"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "意思決定の場に多様な視点が入り、不平等が迅速に解消される。",
+                "demerit": "能力よりも性別を優先することになり、逆差別や不公平を生むとの批判。",
+                "background": "日本の女性政治参画が世界最低水準であることへの強制的解決策。",
+                "impact": {
+                    "dailyLife": "多様な民意の反映。",
+                    "economic": "女性の就業継続率向上。",
+                    "social": "性別役割意識の払拭。",
+                    "national": "民主主義の質向上。",
+                    "global": "ジェンダーギャップ指数の改善。",
+                    "welfare": "なし",
+                    "culture": "「男性中心」の変容。"
+                }
+            }
+        },
+        {
+            "id": "q_values_05",
+            "text": "学校教育において、道徳や愛国心、日本の伝統文化を今以上に重視して教えるべきだ。",
+            "category": "Values",
+            "topics": [
+                "教育",
+                "愛国心",
+                "伝統"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "自国に誇りを持つことで、道徳観や規範意識、共同体への愛着が育つ。",
+                "demerit": "多様な価値観が否定され、偏ったナショナリズムを助長する恐れ。",
+                "background": "グローバル化の中で、日本のアイデンティティをどう教育に組み込むか。",
+                "impact": {
+                    "dailyLife": "子供の価値観形成。",
+                    "economic": "なし。",
+                    "social": "保守的な道徳律の強化。",
+                    "national": "一体感の醸成。",
+                    "global": "歴史認識問題への波及可能性。",
+                    "welfare": "なし",
+                    "culture": "伝統の継承。"
+                }
+            }
+        },
+        {
+            "id": "q_values_06",
+            "text": "生活保護の受給基準を緩和し、必要な人が心理的抵抗なく支援を受けられる「権利」として確立すべきだ。",
+            "category": "Values",
+            "topics": [
+                "生活保護",
+                "福祉の権利",
+                "社会的孤立"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "餓死や孤独死を防ぎ、誰でも再起できるセーフティネットとして機能する。",
+                "demerit": "不正受給の増加や、労働意欲を削ぐことへの国民の強い拒否感。",
+                "background": "受給に対する「スティグマ（恥）」の払拭を目指す動き。",
+                "impact": {
+                    "dailyLife": "いざという時の安心。",
+                    "economic": "なし。",
+                    "social": "優しい社会の構築。",
+                    "national": "生存権の保障。",
+                    "global": "なし",
+                    "welfare": "格差対策。",
+                    "culture": "「人に頼る」文化の醸成。"
+                }
+            }
+        },
+        {
+            "id": "q_values_07",
+            "text": "放送の公平性を守るため、政府が放送局に電波停止を命じることができる現行の法規定は撤廃すべきだ。",
+            "category": "Values",
+            "topics": [
+                "放送法",
+                "表現の自由",
+                "メディア監視"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "政権によるメディアへの圧力を排除し、真の報道の自由を確保できる。",
+                "demerit": "著しく偏った情報が拡散された際、歯止めをかける手段がなくなる。",
+                "background": "権力とメディアの適切な距離感を巡る民主主義の根幹。",
+                "impact": {
+                    "dailyLife": "情報の多様性確保。",
+                    "economic": "なし。",
+                    "social": "権力監視機能の強化。",
+                    "national": "民主主義の成熟。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_values_08",
+            "text": "宗教法人に対する非課税特権を見直し、収益事業以外にも広く課税すべきだ。",
+            "category": "Values",
+            "topics": [
+                "宗教法人",
+                "課税の公平",
+                "政治と宗教"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "「税逃れ」の批判を解消し、税負担の公平性を確保できる。",
+                "demerit": "信教の自由を侵害し、小規模な寺院や神社の維持が困難になる。",
+                "background": "旧統一教会問題などを受け、宗教団体の社会的責任が問われている。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "新たな税収の創出。",
+                    "social": "不公平感の解消。",
+                    "national": "なし。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "伝統施設の崩壊リスク。"
+                }
+            }
+        },
+        {
+            "id": "q_values_09",
+            "text": "地域のコミュニティを守るため、大規模商業施設やネット通販の拡大を抑制し、地元の商店街を保護すべきだ。",
+            "category": "Values",
+            "topics": [
+                "商店街",
+                "地域活性化",
+                "地産地消"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "地域の雇用や繋がりが維持され、災害時の拠点としても機能する。",
+                "demerit": "消費者の利便性が低下し、競争の欠如による価格上昇を招く。",
+                "background": "効率主義（グローバリズム）か地域主義（ローカリズム）かの選択。",
+                "impact": {
+                    "dailyLife": "買い物の不便と価格。地域の絆。",
+                    "economic": "地域資本の循環。",
+                    "social": "高齢者の買い物難民対策。",
+                    "national": "なし",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "街並みの保存。"
+                }
+            }
+        },
+        {
+            "id": "q_future_01",
+            "text": "AIが普及した社会に合わせ、労働時間を短縮する「週休3日制」を法律で強力に推進すべきだ。",
+            "category": "Future",
+            "topics": [
+                "週休3日",
+                "AI",
+                "働き方改革"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "余暇時間が増え、QOL向上や自己研鑽、家族との時間が増える。",
+                "demerit": "労働力不足の加速や、実質的な所得減少、企業のコスト増の懸念。",
+                "background": "AIによる生産性向上を労働者に還元する未来論の先駆け。",
+                "impact": {
+                    "dailyLife": "プライベートの充実。",
+                    "economic": "消費拡大と生産性向上競争。",
+                    "social": "働き方の多様化。",
+                    "national": "なし。",
+                    "global": "なし。",
+                    "welfare": "メンタルヘルス改善。",
+                    "culture": "労働観の抜本的変化。"
+                }
+            }
+        },
+        {
+            "id": "q_future_02",
+            "text": "カーボンニュートラル実現のため、ガソリン車の販売禁止や再エネ賦課金の増額など、家計負担を伴う環境政策を断行すべきだ。",
+            "category": "Future",
+            "topics": [
+                "脱炭素",
+                "環境政策",
+                "国民負担"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "地球温暖化を食い止め、未来世代に持続可能な環境を引き継げる。",
+                "demerit": "光熱費や車両価格の高騰を招き、現在の生活が困窮する。",
+                "background": "気候危機の緊急性と、現在の生活コストのバランス。",
+                "impact": {
+                    "dailyLife": "光熱費や車のコスト上昇。",
+                    "economic": "グリーン産業の育成。",
+                    "social": "環境意識の向上。",
+                    "national": "脱炭素目標達成。",
+                    "global": "国際貢献と責任履行。",
+                    "welfare": "なし",
+                    "culture": "大量消費生活の終焉。"
+                }
+            }
+        },
+        {
+            "id": "q_future_03",
+            "text": "人口減少に対応するため、居住エリアを都市部に集約する「コンパクトシティ」を推進し、過疎地のインフラ維持は段階的に縮小すべきだ。",
+            "category": "Future",
+            "topics": [
+                "コンパクトシティ",
+                "地方自治",
+                "人口減"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "行政サービスの維持コストを下げ、将来の国民負担を抑制できる。",
+                "demerit": "故郷を捨てることを強いることになり、地方の伝統文化を破壊する。",
+                "background": "人口が減る中、どこまで広く薄くインフラを維持できるかの現実的選択。",
+                "impact": {
+                    "dailyLife": "住み慣れた土地からの移住検討。",
+                    "economic": "財政の健全化。",
+                    "social": "なし。",
+                    "national": "国土再編の実行。",
+                    "global": "なし",
+                    "welfare": "効率的医療サービスの提供。",
+                    "culture": "郷土文化の喪失。"
+                }
+            }
+        },
+        {
+            "id": "q_future_04",
+            "text": "首相を国民が直接投票で選ぶ「首相公選制」を導入し、強力なリーダーシップを実現すべきだ。",
+            "category": "Future",
+            "topics": [
+                "首相公選制",
+                "統治機構",
+                "民主主義"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "国民の民意をダイレクトに反映でき、派閥政治を打破できる。",
+                "demerit": "議院内閣制の否定になり、人気取りのポピュリズムを招く危険。",
+                "background": "閉塞感のある政治に対し、国民の直接参加を求める声。",
+                "impact": {
+                    "dailyLife": "政治への関心向上。",
+                    "economic": "なし。",
+                    "social": "なし。",
+                    "national": "日本の国家体制の抜本改革。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_future_05",
+            "text": "不治の病で深刻な苦痛を抱える人に対し、本人の意思に基づく「尊厳死（安楽死）」を日本でも法的に認めるべきだ。",
+            "category": "Future",
+            "topics": [
+                "尊厳死",
+                "生命倫理",
+                "多死社会"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "最期まで自分らしく生き、苦痛から解放される権利を保障できる。",
+                "demerit": "「周囲に迷惑をかけたくない」という圧力で死を強いる社会になる恐れ。",
+                "background": "超高齢・多死社会における「死の在り方」への問い。",
+                "impact": {
+                    "dailyLife": "終末期の選択肢拡大。",
+                    "economic": "過剰な延命治療費の抑制。",
+                    "social": "なし。",
+                    "national": "なし。",
+                    "global": "一部先進国の潮流への適応。",
+                    "welfare": "終末期ケアの変容。",
+                    "culture": "命の尊厳の再定義。"
+                }
+            }
+        },
+        {
+            "id": "q_future_06",
+            "text": "事務効率を最大化するため、2030年までに全ての行政手続きから「紙と印鑑」を完全に廃止し、電子化すべきだ。",
+            "category": "Future",
+            "topics": [
+                "DX",
+                "電子政府",
+                "効率化"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "場所を選ばない行政サービスが可能になり、公務員の人件費も削減できる。",
+                "demerit": "ITに不慣れな層が排除される、またはセキュリティ事故の被害を受ける。",
+                "background": "日本の生産性低迷の原因とされるアナログ文化の打破。",
+                "impact": {
+                    "dailyLife": "役所に出向く手間の解消。",
+                    "economic": "事務コストの大幅削減。",
+                    "social": "デジタル格差の顕在化。",
+                    "national": "電子政府の完成。",
+                    "global": "なし",
+                    "welfare": "なし",
+                    "culture": "印鑑文化の消滅。"
+                }
+            }
+        },
+        {
+            "id": "q_future_07",
+            "text": "AIが仕事を奪うリスクに備え、国が全国民に最低限の生活費を支給する「ベーシックインカム」の導入を検討すべきだ。",
+            "category": "Future",
+            "topics": [
+                "ベーシックインカム",
+                "AI",
+                "セーフティネット"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "AIによる失業の不安が解消され、生活の基盤が安定する。",
+                "demerit": "膨大な財源が必要であり、既存の年金や福祉が解体されるリスク。",
+                "background": "技術革新による社会構造の変化に備えた究極の再分配議論。",
+                "impact": {
+                    "dailyLife": "定額収入による安心感。",
+                    "economic": "内需の下支え。",
+                    "social": "「働く」意味の変化。",
+                    "national": "社会保障の根本再設計。",
+                    "global": "なし",
+                    "welfare": "他福祉施策との競合。",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_future_08",
+            "text": "科学技術の優位性を保つため、宇宙開発やAI研究などの先端技術への投資を、福祉予算よりも優先して増やすべきだ。",
+            "category": "Future",
+            "topics": [
+                "先端技術",
+                "予算配分",
+                "国家競争力"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "将来の経済成長の源泉を確保し、科学技術立国としての地位を維持できる。",
+                "demerit": "現在の生活に困っている人々への支援が疎かになり、格差を広げる。",
+                "background": "「現在の福祉」か「未来の投資」かという究極の資源配分。",
+                "impact": {
+                    "dailyLife": "将来の技術恩恵と現在の公助削減。",
+                    "economic": "イノベーションの促進。",
+                    "social": "なし。",
+                    "national": "10～50年後の国力。",
+                    "global": "グローバル競争力向上。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        },
+        {
+            "id": "q_future_10",
+            "text": "AIが自律的に判断して攻撃を行う「自律型致死兵器(LAWS)」の開発・保有を、日本は禁止すべきだ。",
+            "category": "Future",
+            "topics": [
+                "AI兵器",
+                "軍縮",
+                "倫理"
+            ],
+            "questionType": "standard",
+            "analysis": {
+                "merit": "「AIが人を殺す」という倫理的危機を防ぎ、暴走や誤作動のリスクを排除できる。",
+                "demerit": "他国が導入した場合、日本の防衛力が圧倒的に不利になる可能性がある。",
+                "background": "兵器の自動化が進む中、人間の関与をどこまで残すべきかという議論。",
+                "impact": {
+                    "dailyLife": "なし。",
+                    "economic": "軍需産業の制約。",
+                    "social": "なし。",
+                    "national": "平和主義の先端化。",
+                    "global": "国際的規制のリード。",
+                    "welfare": "なし",
+                    "culture": "なし"
+                }
+            }
+        }
+    ]
+}

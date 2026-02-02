@@ -38,7 +38,7 @@ export default function ProfilePage() {
         localStorage.setItem("target_election_level", "national");
 
         // Skip election selection and go straight to generation
-        router.push("/questions/generate");
+        router.push("/prologue");
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

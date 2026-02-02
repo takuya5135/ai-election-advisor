@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateAdditionalQuestions, generateSingleReplacementQuestion } from "@/app/actions/ai";
+import { getAdditionalQuestionsFromPool } from "@/app/actions/question_service";
 
 type Analysis = {
     merit: string;
@@ -129,10 +130,33 @@ export default function QuestionsPage() {
         const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
         const election = localStorage.getItem("target_election") || "";
 
-        const result = await generateAdditionalQuestions(election, profile, questions, answers, comments);
+        // 1. Try to get questions from the pool first
+        const currentIds = questions.map(q => q.id);
 
-        if (result.success && result.data) {
-            const newQuestions = [...questions, ...result.data];
+        let newQuestionsData: Question[] | null = null;
+
+        try {
+            const poolResult = await getAdditionalQuestionsFromPool(currentIds, 5); // Fetch 5 questions
+            if (poolResult.success && poolResult.data) {
+                console.log("Loaded additional questions from pool.");
+                newQuestionsData = poolResult.data;
+            } else {
+                console.log("Pool exhausted or failed, switching to Live AI generation.");
+            }
+        } catch (err) {
+            console.error("Pool fetch error:", err);
+        }
+
+        // 2. Fallback to Live AI if pool didn't return questions
+        if (!newQuestionsData) {
+            const result = await generateAdditionalQuestions(election, profile, questions, answers, comments);
+            if (result.success && result.data) {
+                newQuestionsData = result.data;
+            }
+        }
+
+        if (newQuestionsData) {
+            const newQuestions = [...questions, ...newQuestionsData];
             setQuestions(newQuestions);
             localStorage.setItem("generated_questions", JSON.stringify(newQuestions));
             setIsLoadingMore(false);
