@@ -37,8 +37,8 @@ export default function ProfilePage() {
         localStorage.setItem("target_election", "第51回衆議院議員総選挙");
         localStorage.setItem("target_election_level", "national");
 
-        // Skip election selection and go straight to questions for Hyogo 7
-        router.push("/questions");
+        // Skip election selection and go straight to generation
+        router.push("/questions/generate");
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

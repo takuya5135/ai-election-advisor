@@ -11,6 +11,11 @@ export default function GenerateQuestionsPage() {
 
     useEffect(() => {
         const startGeneration = async () => {
+            // Clear previous session data to prevent state matching old questions
+            localStorage.removeItem("user_answers");
+            localStorage.removeItem("user_comments");
+            localStorage.removeItem("ai_advice");
+
             const profileStr = localStorage.getItem("user_profile");
             const electionStr = localStorage.getItem("target_election");
 
