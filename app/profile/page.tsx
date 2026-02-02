@@ -7,73 +7,43 @@ export default function ProfilePage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         nickname: "",
-        residence: "",
+        // residence is removed as we target Hyogo 7 specifically
         age: "",
         maritalStatus: "",
         childrenCount: "",
         occupation: "",
         economicStatus: "standard",
     });
-    const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         // Load stored profile if available
         const storedProfile = localStorage.getItem("user_profile");
         if (storedProfile) {
             const parsed = JSON.parse(storedProfile);
-            // マイグレーション: 古いfamilyデータがある場合は適当にマッピングするか、リセットする
-            // ここではシンプルに新規フィールドがなければ空にする
             setFormData(prev => ({ ...prev, ...parsed }));
         }
     }, []);
 
-    const fetchSuggestions = async (query: string) => {
-        if (!query || query.length < 2) {
-            setSuggestions([]);
-            return;
-        }
-
-        setIsSearching(true);
-        try {
-            // 国土地理院の住所検索API
-            const response = await fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(query)}`);
-            const data = await response.json();
-            // 重複を排除して正確な住所文字列を抽出
-            const results = data
-                .map((item: any) => item.properties.title)
-                .filter((value: string, index: number, self: string[]) => self.indexOf(value) === index)
-                .slice(0, 10);
-            setSuggestions(results);
-            setShowSuggestions(results.length > 0);
-        } catch (error) {
-            console.error("Address search error:", error);
-        } finally {
-            setIsSearching(false);
-        }
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // Save profile for future
-        localStorage.setItem("user_profile", JSON.stringify(formData));
-        router.push("/elections"); // Next step: Select election based on residence
+        const profileWithFixedLocation = {
+            ...formData,
+            residence: "兵庫県西宮市・芦屋市 (兵庫7区)"
+        };
+        localStorage.setItem("user_profile", JSON.stringify(profileWithFixedLocation));
+
+        // Set default election context for Hyogo 7
+        localStorage.setItem("target_election", "第51回衆議院議員総選挙");
+        localStorage.setItem("target_election_level", "national");
+
+        // Skip election selection and go straight to questions for Hyogo 7
+        router.push("/questions");
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-
-        if (name === "residence") {
-            const timer = setTimeout(() => fetchSuggestions(value), 300);
-            return () => clearTimeout(timer);
-        }
-    };
-
-    const handleSelectSuggestion = (suggestion: string) => {
-        setFormData((prev) => ({ ...prev, residence: suggestion }));
-        setShowSuggestions(false);
     };
 
     return (
@@ -81,8 +51,8 @@ export default function ProfilePage() {
             <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-indigo-900 border-b-2 border-indigo-100 pb-2">プロフィール設定</h2>
                 <p className="text-gray-600">
-                    あなたの属性に合わせて、最適な選挙情報とアドバイスを提供します。<br />
-                    入力情報はブラウザにのみ保存され、後で変更も可能です。
+                    あなたの属性に合わせて、アドバイスを最適化します。<br />
+                    本アプリは現在、<strong>兵庫7区（西宮市・芦屋市）</strong>専用です。
                 </p>
             </div>
 
@@ -97,54 +67,6 @@ export default function ProfilePage() {
                         value={formData.nickname}
                         onChange={handleChange}
                     />
-                </div>
-
-                <div className="space-y-2 relative">
-                    <label className="text-sm font-bold text-gray-700">居住地（町名まで） <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                        <input
-                            name="residence"
-                            required
-                            placeholder="例: 西宮市六湛寺町（入力すると候補が出ます）"
-                            autoComplete="off"
-                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-gray-900"
-                            value={formData.residence}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setFormData(prev => ({ ...prev, residence: val }));
-                                // シンプルなデバウンス代わり
-                                fetchSuggestions(val);
-                            }}
-                            onFocus={() => {
-                                if (suggestions.length > 0) setShowSuggestions(true);
-                            }}
-                            onBlur={() => {
-                                // クリックイベントを拾うために少し遅延させる
-                                setTimeout(() => setShowSuggestions(false), 200);
-                            }}
-                        />
-                        {isSearching && (
-                            <div className="absolute right-3 top-3.5">
-                                <div className="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
-                            </div>
-                        )}
-                    </div>
-                    <p className="text-xs text-gray-500">選挙区の正確な判定に使用します。町名まで入力してください。</p>
-
-                    {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                            {suggestions.map((suggestion, index) => (
-                                <button
-                                    key={index}
-                                    type="button"
-                                    onClick={() => handleSelectSuggestion(suggestion)}
-                                    className="w-full text-left p-3 hover:bg-indigo-50 transition-colors border-b border-gray-50 last:border-0 text-sm text-gray-900"
-                                >
-                                    {suggestion}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -255,7 +177,7 @@ export default function ProfilePage() {
                         type="submit"
                         className="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all shadow-md active:scale-[0.98]"
                     >
-                        自分に合った選挙を探す
+                        次へ（質問に回答する）
                     </button>
                     <p className="text-center text-xs text-gray-400 mt-4 italic">
                         ※お預かりした属性情報は、アドバイス生成の目的以外には使用されません。
