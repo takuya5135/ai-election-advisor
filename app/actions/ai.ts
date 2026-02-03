@@ -228,8 +228,7 @@ export async function translateQuestionsForAge(questions: any[], userProfile: an
            - **questionType="administration_evaluation"の場合**: これは5段階評価（1:支持しない〜5:支持する）のための質問です。「今の政府は〜をよく頑張っていると思いますか？」や「政府の〜という対応は評価できると思いますか？」のように、**評価の度合いを問いかける形式、または評価できる点についての質問**にしてください。
         3. **出力**: 書き換えたJSONオブジェクトのみを出力してください。Markdownのコードブロック等は不要です。
         `;
-        3. ** 出力 **: 書き換えたJSONオブジェクトのみを出力してください。Markdownのコードブロック等は不要です。
-        `;
+
 
         const { object } = await generateObject({
             model: google(AI_MODELS.FLASH),
@@ -260,11 +259,11 @@ export async function generateSingleReplacementQuestion({
 }) {
     try {
         const prompt = `
-        ${ getBasePrompt(electionName, userProfile) }
+        ${getBasePrompt(electionName, userProfile)}
 
         【タスク: 質問の差し替え】
         ユーザーは以下の質問に対して「関心がない / 分からない」として、別の質問を求めています。
-        拒否された質問: 「${ currentQuestionText }」
+        拒否された質問: 「${currentQuestionText}」
 
         このユーザーのために、** 全く新しい切り口の質問を1つだけ ** 作成してください。
         
@@ -273,7 +272,7 @@ export async function generateSingleReplacementQuestion({
         2. 特に **「根本的な政治姿勢（大きな政府vs小さな政府）」** や **「政権への好悪」** のように、政策知識がなくても直感的に答えやすいテーマを優先してください。
         3. IDは "replace_${Date.now()}" のようなユニークなものにしてください。
 
-        既出のIDリスト（これらとも重複しないこと）: ${ excludedQuestionIds.join(", ") }
+        既出のIDリスト（これらとも重複しないこと）: ${excludedQuestionIds.join(", ")}
         `;
 
         const singleQuestionSchema = z.object({
@@ -316,7 +315,7 @@ export async function generateSingleReplacementQuestion({
 export async function generateAdditionalQuestions(electionName: string, userProfile: any, previousQuestions: any[], previousAnswers: any, previousComments: any) {
     try {
         const prompt = `
-    ${ getBasePrompt(electionName, userProfile) }
+    ${getBasePrompt(electionName, userProfile)}
 
         現在の状況:
         ユーザーは既に以下の質問に回答しました。追加の質問を作成する際は、以下の点に厳守してください：
@@ -325,7 +324,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
         3. ** ユーザーの反応に合わせた深掘り **: ユーザーが「分からない」と答えたり、コメントで特定の関心を示している場合は、そこを分かりやすく噛み砕いて深掘りしてください。
 
         これまでの質問と回答・コメント:
-    ${ previousQuestions.map((q: any) => `- [${q.id}] ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]} ${previousComments[q.id] ? `(コメント: ${previousComments[q.id]})` : ""}`).join("\n") }
+    ${previousQuestions.map((q: any) => `- [${q.id}] ${q.text} [${q.category}] -> 回答: ${previousAnswers[q.id]} ${previousComments[q.id] ? `(コメント: ${previousComments[q.id]})` : ""}`).join("\n")}
 
         タスク:
         ユーザーは「分からない」「どちらでもない」と回答する傾向があります。これは個別の政策に詳しくないか、関心が薄い可能性があります。
@@ -342,7 +341,7 @@ export async function generateAdditionalQuestions(electionName: string, userProf
         3. ** 政権・政治家への直感的な評価(3問) **:
         - 具体的な政策の是非ではなく、「現在の首相のリーダーシップや人柄に好感を持っている」「今の内閣の顔ぶれは信頼できると感じる」といった、感情的・直感的な評価を問うもの。
 
-        各質問には、以前の質問と重複しない一意のID（例: add_q_${ Date.now() }_1...）を必ず付与してください。
+        各質問には、以前の質問と重複しない一意のID（例: add_q_${Date.now()}_1...）を必ず付与してください。
         詳細な分析（analysis）も同様に付与してください。
         `;
 
@@ -380,7 +379,7 @@ export async function findElections(residence: string) {
 
         // Step 1: Raw Research for National Elections
         const nationalPrompt = `
-    現在の日時は ${ today } です。
+    現在の日時は ${today} です。
         日本国内で行われる直近の ** 国政選挙（衆議院議員総選挙、参議院議員通常選挙）** を調査してください。
     
     【最優先・厳守ソース】
@@ -403,13 +402,13 @@ export async function findElections(residence: string) {
 
         // Step 2: Raw Research for Local Elections
         const localPrompt = `
-    現在の日時は ${ today } です。
-        居住地「${ residence }」のユーザーに関係する「現在実施中」または「近い将来（半年〜1年以内）に予定されている」** 地方選挙 ** を調査してください。
+    現在の日時は ${today} です。
+        居住地「${residence}」のユーザーに関係する「現在実施中」または「近い将来（半年〜1年以内）に予定されている」** 地方選挙 ** を調査してください。
     
     【最優先・厳守ソース】
         1. https://go2senkyo.com/local
         2. https://go2senkyo.com/schedule
-        上記ソースから「${ residence }」に関連する選挙（知事、市長、区長、町長、村長、および各議会）を漏らさず取得してください。
+        上記ソースから「${residence}」に関連する選挙（知事、市長、区長、町長、村長、および各議会）を漏らさず取得してください。
     
     【調査対象】
         - 兵庫県西宮市などの具体的な自治体の選挙管理委員会サイトなども併せて参照してください。
@@ -423,14 +422,14 @@ export async function findElections(residence: string) {
 
         // Step 3: Cross-Verification and Structured Extraction
         const finalPrompt = `
-    現在の日時は ${ today } です。
-        以下の調査資料に基づき、居住地「${ residence }」のユーザーに関係する選挙を合計3〜5件、JSON形式で抽出してください。
+    現在の日時は ${today} です。
+        以下の調査資料に基づき、居住地「${residence}」のユーザーに関係する選挙を合計3〜5件、JSON形式で抽出してください。
     
     【国政選挙資料】
-    ${ nationalResearch }
+    ${nationalResearch}
     
     【地方選挙資料】
-    ${ localResearch }
+    ${localResearch}
 
     【重要ルール】
         1. ** 日付の優先順序 **: 解散・公示・投票日が明記されている具体的な日付（例: 2月8日）を最優先してください。「未定」は可能な限り避け、報道された有力な日程を採用してください。
