@@ -2,6 +2,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import { translateQuestionsForAge } from './ai';
 
 export async function getQuestionsFromPool(userProfile: any, electionContext: string) {
     try {
@@ -56,7 +57,10 @@ export async function getQuestionsFromPool(userProfile: any, electionContext: st
         // 4. Combine: Standard Questions FIRST, then Admin Questions
         const finalQuestions = [...finalStandard, ...adminQuestions];
 
-        return { success: true, data: finalQuestions };
+        // 5. Translate Questions based on User Age
+        const translatedQuestions = await translateQuestionsForAge(finalQuestions, userProfile);
+
+        return { success: true, data: translatedQuestions };
 
     } catch (error) {
         console.error("Values Pool Error:", error);
@@ -64,7 +68,7 @@ export async function getQuestionsFromPool(userProfile: any, electionContext: st
     }
 }
 
-export async function getAdditionalQuestionsFromPool(currentQuestionIds: string[], count: number = 5) {
+export async function getAdditionalQuestionsFromPool(currentQuestionIds: string[], count: number = 5, userProfile?: any) {
     try {
         const poolPath = path.join(process.cwd(), 'app', 'lib', 'data', 'question_pool.json');
         const poolData = await fs.readFile(poolPath, 'utf-8');
@@ -87,7 +91,13 @@ export async function getAdditionalQuestionsFromPool(currentQuestionIds: string[
         const shuffled = availableQuestions.sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, count);
 
-        return { success: true, data: selected };
+        // Translate additional questions if profile is provided
+        let finalQuestions = selected;
+        if (userProfile) {
+            finalQuestions = await translateQuestionsForAge(selected, userProfile);
+        }
+
+        return { success: true, data: finalQuestions };
 
     } catch (error) {
         console.error("Additional Pool Error:", error);

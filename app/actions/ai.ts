@@ -3,7 +3,7 @@
 import { generateObject, generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
-import { AI_MODELS } from "@/app/lib/models";
+import { AI_MODELS } from "../lib/models";
 
 // Detailed schema for deep analysis
 const questionSchema = z.object({
@@ -151,6 +151,91 @@ export async function generateElectionQuestions(electionName: string, userProfil
     } catch (error) {
         console.error("AI Generation Error:", error);
         return { success: false, error: "AI Generation Failed" };
+    }
+}
+
+// Age-based Question Translation
+export async function translateQuestionsForAge(questions: any[], userProfile: any) {
+    try {
+        // Skip for adult profile or if age is not specified
+        if (!userProfile.age || userProfile.age === "adult") {
+            return questions;
+        }
+
+        let agePrompt = "";
+        if (userProfile.age === "elementary") {
+            agePrompt = `
+            【ターゲット: 小学校高学年 (10-12歳)】
+            - **役割**: 社会科の授業のような「知的な先生」。
+            - **文体**: 幼稚な「〜だよ」言葉ではなく、「〜です・ます」「〜でしょうか？」といった、丁寧で分かりやすい言葉遣い。
+            - **漢字使用**: 全てひらがなにせず、「選挙」「税金」「政治」「法律」など、小学校で習うレベルの漢字は使用してください（必要に応じて括弧でふりがなを振っても良いです）。
+            - **変換方針**: 
+              1. 専門用語（財源、安全保障など）は、「国のお金の使い方」「国を守ること」のように、意味が伝わる言葉に言い換えてください。
+              2. 例え話は、お小遣いだけでなく、「学校のルール」「給食」「委員会活動」など、少し社会性のある身近な話題を含めてください。
+            `;
+        } else if (userProfile.age === "middle_high") {
+            agePrompt = `
+            【ターゲット: 中学生・高校生 (13-18歳)】
+            - **役割**: 頼れる先輩や兄貴分。
+            - **文体**: 教科書のような堅苦しさを排除し、SNSやYouTubeで見るような「自分たちに向けられた言葉」と感じるフランクだが知的なトーン。
+            - **変換方針**:
+              1. 勉強、部活、バイト、将来の進路など、彼らの関心事に関連付けて説明してください。
+              2. 「大人の事情」を押し付けず、彼らの正義感や疑問に寄り添う表現にしてください。
+            `;
+        } else if (userProfile.age === "young_adult") { // 18-29
+            agePrompt = `
+            【ターゲット: 若者 (18-29歳)】
+            - **役割**: 同じ目線を持つ同世代のアドバイザー。
+            - **文体**: 実用的で簡潔なトーン。「コスパ」「タイパ」「将来不安」といった感覚に寄り添う。
+            - **変換方針**:
+              1. 手取り給与、就職・転職、結婚・育児のハードルなど、ライフステージの初期におけるリアルな悩みに結びつけてください。
+              2. 綺麗事よりも「自分にどう損得があるか」を明確にしてください。
+            `;
+        } else if (userProfile.age === "senior") { // 60+
+            agePrompt = `
+            【ターゲット: シニア層 (60歳以上)】
+            - **役割**: 礼儀正しく信頼できる専門家。
+            - **文体**: 丁寧語（です・ます）を基本とし、敬意を払った落ち着いたトーン。
+            - **変換方針**:
+              1. 「エビデンス」「アジェンダ」「コミット」のようなカタカナ語やビジネス用語は避け、「証拠」「課題」「約束」など美しい日本語を使ってください。
+              2. 文字が多くなりすぎないよう、簡潔で読みやすい表現を心がけてください。
+            `;
+        } else {
+            // Fallback for other ages not strictly defined or if generic 'adult' flows here
+            return questions;
+        }
+
+        const prompt = `
+        あなたはプロの「翻訳家」です。以下の選挙に関する質問リストを、指定されたターゲット層に合わせてリライト（翻訳）してください。
+        
+        ${agePrompt}
+
+        【入力データ】
+        ${JSON.stringify(questions)}
+
+        【重要ルール】
+        1. **JSON構造の維持**: 配列の順序やオブジェクトのキー（id, category, questionTypeなど）は**絶対に変更しないでください**。書き換えるのは以下のフィールドのみです：
+           - text (質問文)
+           - analysis.merit
+           - analysis.demerit
+           - analysis.background
+           - analysis.impact (各項目)
+        2. **意味の維持**: 質問の意図や政策の核心（賛成か反対か）が変わらないようにしてください。表現だけをターゲットに合わせて最適化してください。
+        3. **出力**: 書き換えたJSONオブジェクトのみを出力してください。Markdownのコードブロック等は不要です。
+        `;
+
+        const { object } = await generateObject({
+            model: google(AI_MODELS.FLASH),
+            schema: questionSchema,
+            prompt: prompt,
+        });
+
+        return object.questions;
+
+    } catch (error) {
+        console.error("Age Translation Error:", error);
+        // Fallback: return original questions if translation fails
+        return questions;
     }
 }
 
