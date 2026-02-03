@@ -79,7 +79,9 @@ export default function ProfilePage() {
                             onChange={handleChange}
                         >
                             <option value="">選択してください</option>
-                            <option value="10s">10代</option>
+                            <option value="elementary">小学生</option>
+                            <option value="middle_high">中高生</option>
+                            <option value="10s">10代（大学生・社会人）</option>
                             <option value="20s">20代</option>
                             <option value="30s">30代</option>
                             <option value="40s">40代</option>

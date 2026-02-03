@@ -98,8 +98,32 @@ export async function generateVoteAdvice({
 
         const logicAndParties = JSON.stringify(electionJson.party_alignments, null, 2);
 
+
+        // Determine Tone based on Age
+        let toneInstruction = "";
+        if (userProfile.age === "elementary") {
+            toneInstruction = `
+            【重要：小学生向けモード】
+            ユーザーは小学生です。以下の点に厳重に注意してアドバイスを作成してください。
+            1. **難しい言葉は避ける**: 専門用語は使わず、日常的な言葉で説明してください。「経済」→「お金や暮らし」、「外交」→「外国とのつきあい」など。
+            2. **漢字を減らす**: 難しい漢字には読み仮名を振るか、ひらがなで表記してください（例：「政策（せいさく）」「選挙（せんきょ）」）。
+            3. **優しく、親しみやすい言葉遣い**: 「〜です、〜ます」調で、先生が優しく教えるようなトーンにしてください。
+            4. **比喩を使う**: 難しい概念は、学校生活や家庭生活に例えて説明してください。
+            `;
+        } else if (userProfile.age === "middle_high") {
+            toneInstruction = `
+            【重要：中高生向けモード】
+            ユーザーは中高生です。以下の点に注意して文章を作成してください。
+            1. **分かりやすく解説する**: ニュースで聞くような用語（インフレ、安全保障など）は、簡単な言葉で補足説明を入れてください。
+            2. **自分事として捉えられるように**: 学校生活や将来の進路、アルバイトなどに関わる話題と絡めて説明してください。
+            3. **論理的かつフラットに**: 子供扱いしすぎず、一人の「未来の有権者」として対等に扱ってください。
+            `;
+        }
+
         // Advice Generation Prompt
         const advicePrompt = `
+        ${toneInstruction}
+
         あなたは${electionJson.election_meta.name}における、${targetDistrict.name}専属の選挙アドバイザーです。
 
         【重要：思考と判断のルール】

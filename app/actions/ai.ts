@@ -29,14 +29,34 @@ const questionSchema = z.object({
     })).min(5).max(30),
 });
 
-// Helper for prompt construction
-const getBasePrompt = (electionName: string, userProfile: any) => `
+const getBasePrompt = (electionName: string, userProfile: any) => {
+    let toneInstruction = "";
+    if (userProfile.age === "elementary") {
+        toneInstruction = `
+            【重要：小学生向けモード】
+            ユーザーは小学生です。
+            1. **質問文は極めて単純に**: 「消費税を上げるべきか」ではなく「お店で買い物をする時の税金を、もっと高くしてもいいと思いますか？」のように子供でも分かる言葉に噛み砕いてください。
+            2. **分析（analysis）の各項目も小学生向けに**: メリット・デメリットの説明も、お小遣いや給食、学校生活などに例えて説明できるならそうしてください。
+            3. **漢字制限**: 難しい漢字は使わず、ひらがなを多用してください。
+            `;
+    } else if (userProfile.age === "middle_high") {
+        toneInstruction = `
+            【重要：中高生向けモード】
+            ユーザーは中高生です。
+            1. **興味を持てるテーマに**: 将来の負担、教育の無償化、ネットのルールなど、若者に関心が高いテーマに関連付けて質問してください。
+            2. **用語の補足**: 専門用語を使う場合は、その意味が文脈で分かるように工夫してください。
+            `;
+    }
+
+    return `
     現在の日時は ${new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })} です。
     あなたは極めて高度で公平な政治・選挙アドバイザーです。
     ユーザーが「${electionName}」において、自分の価値観に合った投票先を選ぶための、政治的スタンスを判定する質問を作成してください。
 
     ユーザーのプロフィール:
     ${JSON.stringify(userProfile)}
+    
+    ${toneInstruction}
 
     【最重要】質問の形式と作成方針:
     1. **形式**: 全ての質問は、ユーザーが「共感する」「共感しない」で明確に答えられる**「一つの肯定的な主張」または「具体的な提案」の形**で作成してください。
@@ -50,6 +70,7 @@ const getBasePrompt = (electionName: string, userProfile: any) => `
     
     これらをバランスよく組み合わせ、ユーザーの深層心理・政治的立ち位置を「共感度」で浮き彫りにする質問にしてください。
     `;
+};
 
 export async function generateElectionQuestions(electionName: string, userProfile: any, electionLevel?: string) {
     try {
